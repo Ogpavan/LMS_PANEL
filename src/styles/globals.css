@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: "Public Sans";
+  --background: 240 22% 97%;
+  --foreground: 252 10% 30%;
+  --card: 0 0% 100%;
+  --card-foreground: 252 10% 30%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 252 10% 30%;
+  --primary: 248 82% 68%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 27% 96%;
+  --secondary-foreground: 252 10% 30%;
+  --muted: 240 18% 95%;
+  --muted-foreground: 252 7% 46%;
+  --accent: 248 100% 97%;
+  --accent-foreground: 252 10% 30%;
+  --border: 240 13% 88%;
+  --input: 240 13% 88%;
+  --ring: 248 82% 68%;
+  --sidebar: 0 0% 100%;
+  --sidebar-foreground: 252 10% 30%;
+  --sidebar-muted: 240 27% 96%;
+  --radius: 0.875rem;
+}
+
+.dark {
+  --background: 240 11% 15%;
+  --foreground: 240 15% 95%;
+  --card: 240 10% 18%;
+  --card-foreground: 240 15% 95%;
+  --popover: 240 10% 18%;
+  --popover-foreground: 240 15% 95%;
+  --secondary: 240 9% 22%;
+  --secondary-foreground: 240 15% 95%;
+  --muted: 240 9% 22%;
+  --muted-foreground: 240 8% 72%;
+  --accent: 248 28% 24%;
+  --accent-foreground: 240 15% 95%;
+  --border: 240 9% 26%;
+  --input: 240 9% 26%;
+  --sidebar: 240 10% 18%;
+  --sidebar-foreground: 240 15% 95%;
+  --sidebar-muted: 240 9% 22%;
+}
+
+* {
+  @apply border-border;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply min-h-screen bg-background font-sans text-[13px] font-normal leading-[20px] text-foreground antialiased;
+  background: hsl(var(--background));
+}
+
+.dark body {
+  background: hsl(var(--background));
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(115, 103, 240, 0.08), transparent 18%),
+    linear-gradient(180deg, rgba(248, 247, 250, 1), rgba(248, 247, 250, 1));
+  z-index: -1;
+}
+
+.dark body::before {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(115, 103, 240, 0.14), transparent 18%),
+    linear-gradient(180deg, rgba(38, 41, 56, 1), rgba(38, 41, 56, 1));
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 999px;
+}

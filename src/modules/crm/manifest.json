@@ -1,0 +1,268 @@
+{
+  "key": "crm",
+  "title": "CRM",
+  "navigation": [
+    {
+      "section": "Dashboards",
+      "items": [
+        {
+          "title": "CRM",
+          "icon": "LayoutDashboard",
+          "href": "/dashboard/crm",
+          "pageKey": "crm.overview",
+          "badge": "Hot"
+        }
+      ]
+    },
+    {
+      "section": "Applications",
+      "items": [
+        {
+          "title": "Customers",
+          "icon": "Users",
+          "children": [
+            {
+              "title": "Accounts",
+              "href": "/dashboard/crm/accounts",
+              "pageKey": "crm.accounts"
+            },
+            {
+              "title": "Pipeline",
+              "href": "/dashboard/crm/pipeline",
+              "pageKey": "crm.pipeline",
+              "badge": "12"
+            },
+            {
+              "title": "UI Controls",
+              "href": "/dashboard/crm/ui-controls",
+              "pageKey": "crm.ui-controls"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "key": "crm.overview",
+      "title": "CRM",
+      "href": "/dashboard/crm",
+      "moduleKey": "crm",
+      "icon": "LayoutDashboard",
+      "layoutKey": "split",
+      "widgets": [
+        {
+          "id": "crm-hero",
+          "widgetKey": "hero",
+          "title": "Revenue intelligence",
+          "size": "full",
+          "props": {
+            "pills": ["Pipeline", "Accounts", "Forecast", "Retention"]
+          }
+        },
+        {
+          "id": "crm-pipeline",
+          "widgetKey": "chart",
+          "title": "Pipeline velocity",
+          "size": "xl",
+          "props": {
+            "points": [52, 61, 66, 73, 70, 88, 92, 98]
+          }
+        },
+        {
+          "id": "crm-win-rate",
+          "widgetKey": "metric",
+          "title": "Win rate",
+          "props": {
+            "value": "38%",
+            "delta": "+4%",
+            "caption": "From qualified opportunities"
+          }
+        },
+        {
+          "id": "crm-arr",
+          "widgetKey": "metric",
+          "title": "ARR",
+          "props": {
+            "value": "$2.8M",
+            "delta": "+14%",
+            "caption": "Projected annual recurring revenue"
+          }
+        },
+        {
+          "id": "crm-top-accounts",
+          "widgetKey": "table",
+          "title": "Top accounts",
+          "size": "full",
+          "props": {
+            "columns": [
+              { "key": "name", "label": "Account" },
+              { "key": "owner", "label": "Owner" },
+              { "key": "stage", "label": "Stage" },
+              { "key": "value", "label": "Value" }
+            ],
+            "rows": [
+              {
+                "name": "Northstar Labs",
+                "owner": "Avery",
+                "stage": "Proposal",
+                "value": "$82k"
+              },
+              {
+                "name": "Nova Health",
+                "owner": "Riya",
+                "stage": "Negotiation",
+                "value": "$126k"
+              },
+              {
+                "name": "Vektor Ops",
+                "owner": "Ishaan",
+                "stage": "Discovery",
+                "value": "$54k"
+              }
+            ]
+          }
+        },
+        {
+          "id": "crm-notes",
+          "widgetKey": "list",
+          "title": "Account signals",
+          "props": {
+            "rows": [
+              {
+                "label": "Renewal risk",
+                "value": "4 accounts need outreach"
+              },
+              {
+                "label": "Expansion-ready",
+                "value": "11 accounts above product threshold"
+              },
+              {
+                "label": "New SQLs",
+                "value": "29 leads qualified this week"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "crm.accounts",
+      "title": "Accounts",
+      "href": "/dashboard/crm/accounts",
+      "moduleKey": "crm",
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "crm-accounts-table",
+          "widgetKey": "table",
+          "title": "Customer accounts",
+          "size": "full",
+          "props": {
+            "columns": [
+              { "key": "name", "label": "Name" },
+              { "key": "segment", "label": "Segment" },
+              { "key": "health", "label": "Health" },
+              { "key": "mrr", "label": "MRR" }
+            ],
+            "rows": [
+              {
+                "name": "Northstar Labs",
+                "segment": "Enterprise",
+                "health": "Excellent",
+                "mrr": "$14k"
+              },
+              {
+                "name": "Cloud Mint",
+                "segment": "Mid-market",
+                "health": "Good",
+                "mrr": "$7k"
+              },
+              {
+                "name": "Pixel Yard",
+                "segment": "SMB",
+                "health": "Watch",
+                "mrr": "$2k"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "crm.pipeline",
+      "title": "Pipeline",
+      "href": "/dashboard/crm/pipeline",
+      "moduleKey": "crm",
+      "layoutKey": "overview",
+      "widgets": [
+        {
+          "id": "crm-pipeline-stage",
+          "widgetKey": "list",
+          "title": "Pipeline stages",
+          "size": "lg",
+          "props": {
+            "rows": [
+              { "label": "Discovery", "value": "18 deals" },
+              { "label": "Proposal", "value": "9 deals" },
+              { "label": "Negotiation", "value": "5 deals" }
+            ]
+          }
+        },
+        {
+          "id": "crm-pipeline-chart",
+          "widgetKey": "chart",
+          "title": "Weighted forecast",
+          "size": "xl",
+          "props": {
+            "points": [28, 34, 48, 57, 69, 72, 81]
+          }
+        }
+      ]
+    },
+    {
+      "key": "crm.ui-controls",
+      "title": "UI Controls",
+      "href": "/dashboard/crm/ui-controls",
+      "moduleKey": "crm",
+      "layoutKey": "stack",
+      "description": "Reference page for the most-used theme-aligned form and action controls.",
+      "widgets": [
+        {
+          "id": "crm-ui-controls-showcase",
+          "widgetKey": "controls-showcase",
+          "title": "Controls library",
+          "size": "full"
+        },
+        {
+          "id": "crm-ui-table-showcase",
+          "widgetKey": "data-table",
+          "title": "Rich data table",
+          "size": "full",
+          "description": "TanStack-powered table with search, sorting, column filters, row selection, pagination, and column visibility controls.",
+          "props": {
+            "columns": [
+              { "key": "company", "header": "Company", "sortable": true, "filterable": true },
+              { "key": "owner", "header": "Owner", "sortable": true, "filterable": true },
+              { "key": "plan", "header": "Plan", "sortable": true, "filterable": true },
+              { "key": "status", "header": "Status", "type": "badge", "sortable": true, "filterable": true },
+              { "key": "mrr", "header": "MRR", "type": "currency", "sortable": true },
+              { "key": "region", "header": "Region", "sortable": true },
+              { "key": "renewal", "header": "Renewal", "type": "date", "sortable": true }
+            ],
+            "rows": [
+              { "id": "1", "company": "Northstar Labs", "owner": "Avery", "plan": "Enterprise", "status": "Active", "mrr": "$14,200", "region": "US", "renewal": "2026-09-12" },
+              { "id": "2", "company": "Cloud Mint", "owner": "Riya", "plan": "Growth", "status": "Trial", "mrr": "$4,900", "region": "UK", "renewal": "2026-07-18" },
+              { "id": "3", "company": "Pixel Yard", "owner": "Ishaan", "plan": "Starter", "status": "Paused", "mrr": "$1,280", "region": "IN", "renewal": "2026-06-03" },
+              { "id": "4", "company": "Vektor Ops", "owner": "Mia", "plan": "Enterprise", "status": "Active", "mrr": "$18,600", "region": "DE", "renewal": "2026-11-21" },
+              { "id": "5", "company": "Nova Health", "owner": "Noah", "plan": "Growth", "status": "Active", "mrr": "$8,450", "region": "US", "renewal": "2026-08-04" },
+              { "id": "6", "company": "Orbit Grid", "owner": "Sara", "plan": "Growth", "status": "Trial", "mrr": "$6,120", "region": "CA", "renewal": "2026-07-29" },
+              { "id": "7", "company": "Harbor Stack", "owner": "Liam", "plan": "Enterprise", "status": "Active", "mrr": "$22,340", "region": "AU", "renewal": "2026-10-14" },
+              { "id": "8", "company": "Helio Forge", "owner": "Anika", "plan": "Starter", "status": "Paused", "mrr": "$980", "region": "SG", "renewal": "2026-05-28" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

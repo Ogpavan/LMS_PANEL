@@ -1,0 +1,65 @@
+{
+  "key": "ecommerce",
+  "title": "Ecommerce",
+  "navigation": [
+    {
+      "section": "Operations",
+      "items": [
+        {
+          "title": "Ecommerce",
+          "icon": "ShoppingCart",
+          "href": "/dashboard/ecommerce",
+          "pageKey": "ecommerce.overview"
+        }
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "key": "ecommerce.overview",
+      "title": "Ecommerce",
+      "href": "/dashboard/ecommerce",
+      "moduleKey": "ecommerce",
+      "icon": "ShoppingCart",
+      "layoutKey": "overview",
+      "widgets": [
+        {
+          "id": "ecommerce-gmv",
+          "widgetKey": "metric",
+          "title": "GMV",
+          "props": {
+            "value": "$418k",
+            "delta": "+12%"
+          }
+        },
+        {
+          "id": "ecommerce-orders",
+          "widgetKey": "metric",
+          "title": "Orders",
+          "props": {
+            "value": "2,812",
+            "delta": "+9%"
+          }
+        },
+        {
+          "id": "ecommerce-aov",
+          "widgetKey": "metric",
+          "title": "AOV",
+          "props": {
+            "value": "$148",
+            "delta": "+3%"
+          }
+        },
+        {
+          "id": "ecommerce-sales",
+          "widgetKey": "chart",
+          "title": "Sales trend",
+          "size": "xl",
+          "props": {
+            "points": [38, 42, 58, 61, 74, 68, 86, 94]
+          }
+        }
+      ]
+    }
+  ]
+}

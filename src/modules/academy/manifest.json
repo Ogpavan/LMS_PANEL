@@ -1,0 +1,106 @@
+{
+  "key": "academy",
+  "title": "Academy",
+  "navigation": [
+    {
+      "section": "Dashboards",
+      "items": [
+        {
+          "title": "Academy",
+          "icon": "GraduationCap",
+          "href": "/dashboard/academy",
+          "pageKey": "academy.overview"
+        }
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "key": "academy.overview",
+      "title": "Academy",
+      "href": "/dashboard/academy",
+      "moduleKey": "academy",
+      "icon": "GraduationCap",
+      "description": "Learning operations at a glance.",
+      "layoutKey": "overview",
+      "widgets": [
+        {
+          "id": "academy-hero",
+          "widgetKey": "hero",
+          "title": "Academy command center",
+          "size": "full",
+          "props": {
+            "pills": ["Programs", "Engagement", "Curriculum", "Performance"]
+          }
+        },
+        {
+          "id": "academy-learners",
+          "widgetKey": "metric",
+          "title": "Active learners",
+          "size": "sm",
+          "props": {
+            "value": "12.4k",
+            "delta": "+18%",
+            "caption": "Monthly active students"
+          }
+        },
+        {
+          "id": "academy-course-rate",
+          "widgetKey": "metric",
+          "title": "Completion rate",
+          "size": "sm",
+          "props": {
+            "value": "84%",
+            "delta": "+6%",
+            "caption": "Across all cohorts"
+          }
+        },
+        {
+          "id": "academy-sessions",
+          "widgetKey": "metric",
+          "title": "Live sessions",
+          "size": "sm",
+          "props": {
+            "value": "46",
+            "delta": "+9%",
+            "caption": "Scheduled this week"
+          }
+        },
+        {
+          "id": "academy-trend",
+          "widgetKey": "chart",
+          "title": "Enrollment trend",
+          "size": "xl",
+          "props": {
+            "points": [44, 58, 62, 71, 76, 82, 88, 96]
+          }
+        },
+        {
+          "id": "academy-activity",
+          "widgetKey": "list",
+          "title": "Cohort activity",
+          "size": "lg",
+          "props": {
+            "rows": [
+              {
+                "label": "Frontend Mastery",
+                "value": "128 learners active",
+                "tone": "Healthy"
+              },
+              {
+                "label": "Product Leadership",
+                "value": "94 learners active",
+                "tone": "Rising"
+              },
+              {
+                "label": "AI Foundations",
+                "value": "176 learners active",
+                "tone": "High demand"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

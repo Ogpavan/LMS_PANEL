@@ -1,0 +1,56 @@
+{
+  "key": "logistics",
+  "title": "Logistics",
+  "navigation": [
+    {
+      "section": "Operations",
+      "items": [
+        {
+          "title": "Logistics",
+          "icon": "Truck",
+          "href": "/dashboard/logistics",
+          "pageKey": "logistics.overview"
+        }
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "key": "logistics.overview",
+      "title": "Logistics",
+      "href": "/dashboard/logistics",
+      "moduleKey": "logistics",
+      "icon": "Truck",
+      "layoutKey": "overview",
+      "widgets": [
+        {
+          "id": "logistics-routes",
+          "widgetKey": "chart",
+          "title": "Route efficiency",
+          "size": "xl",
+          "props": {
+            "points": [48, 44, 59, 66, 72, 80, 86]
+          }
+        },
+        {
+          "id": "logistics-fleet",
+          "widgetKey": "metric",
+          "title": "Fleet uptime",
+          "props": {
+            "value": "96.2%",
+            "delta": "+0.8%"
+          }
+        },
+        {
+          "id": "logistics-shipments",
+          "widgetKey": "metric",
+          "title": "Live shipments",
+          "props": {
+            "value": "482",
+            "delta": "+5%"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "key": "analytics",
+  "title": "Analytics",
+  "navigation": [
+    {
+      "section": "Insights",
+      "items": [
+        {
+          "title": "Analytics",
+          "icon": "BarChart3",
+          "href": "/dashboard/analytics",
+          "pageKey": "analytics.overview"
+        }
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "key": "analytics.overview",
+      "title": "Analytics",
+      "href": "/dashboard/analytics",
+      "moduleKey": "analytics",
+      "icon": "BarChart3",
+      "layoutKey": "overview",
+      "widgets": [
+        {
+          "id": "analytics-traffic",
+          "widgetKey": "chart",
+          "title": "Traffic composition",
+          "size": "xl",
+          "props": {
+            "points": [14, 24, 18, 36, 28, 52, 60, 74, 82]
+          }
+        },
+        {
+          "id": "analytics-visits",
+          "widgetKey": "metric",
+          "title": "Visits",
+          "props": {
+            "value": "1.2M",
+            "delta": "+22%"
+          }
+        },
+        {
+          "id": "analytics-conversion",
+          "widgetKey": "metric",
+          "title": "Conversion",
+          "props": {
+            "value": "7.9%",
+            "delta": "+1.2%"
+          }
+        },
+        {
+          "id": "analytics-referrals",
+          "widgetKey": "list",
+          "title": "Top channels",
+          "size": "lg",
+          "props": {
+            "rows": [
+              { "label": "Organic search", "value": "43%" },
+              { "label": "Paid social", "value": "24%" },
+              { "label": "Partner referrals", "value": "18%" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
