@@ -2,9 +2,9 @@ import { adminConfig } from "@/config/admin.config";
 import { getRegistrySnapshot } from "@/services/registry-service";
 
 export function getRegisteredPages() {
-  return [...getRegistrySnapshot(adminConfig.currentRole).pages.values()];
+  return [...getRegistrySnapshot(adminConfig.defaultRole).pages.values()];
 }
 
 export function getPageByHref(href: string) {
-  return getRegistrySnapshot(adminConfig.currentRole).pagesByHref.get(href) ?? null;
+  return getRegistrySnapshot(adminConfig.defaultRole).pagesByHref.get(href) ?? null;
 }

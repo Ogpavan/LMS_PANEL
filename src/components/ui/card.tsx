@@ -10,7 +10,7 @@ export const Card = React.memo(function Card({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("rounded-xl border border-border/80 bg-card text-card-foreground shadow-shell", className)}
+      className={cn("rounded-md border border-border/80 bg-card text-card-foreground shadow-shell", className)}
       {...props}
     />
   );

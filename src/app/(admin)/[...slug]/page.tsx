@@ -1,18 +1,38 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 import { adminConfig } from "@/config/admin.config";
 import { AppShell } from "@/components/layouts/app-shell";
 import { NotFoundPage } from "@/components/layouts/not-found-page";
 import { PageRenderer } from "@/components/layouts/page-renderer";
-import { getRegistrySnapshot } from "@/services/registry-service";
-import { resolveRoute } from "@/utils/routes";
+import { useAdminRoute } from "@/hooks/use-admin-route";
+import { useAuthStore } from "@/store/auth-store";
 
-export default async function DynamicAdminPage({
-  params
-}: {
-  params: Promise<{ slug: string[] }>;
-}) {
-  const resolvedParams = await params;
-  const snapshot = getRegistrySnapshot(adminConfig.currentRole);
-  const match = resolveRoute(snapshot, resolvedParams.slug);
+export default function DynamicAdminPage() {
+  const router = useRouter();
+  const { snapshot, match } = useAdminRoute();
+  const hydrated = useAuthStore((state) => state.hydrated);
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const expiresAt = useAuthStore((state) => state.expiresAt);
+  const clearSession = useAuthStore((state) => state.clearSession);
+
+  const isExpired = !expiresAt || Date.parse(expiresAt) <= Date.now();
+
+  useEffect(() => {
+    if (hydrated && (!accessToken || isExpired)) {
+      if (accessToken && isExpired) {
+        clearSession();
+      }
+
+      router.replace("/login");
+    }
+  }, [accessToken, clearSession, hydrated, isExpired, router]);
+
+  if (!hydrated || !accessToken || isExpired) {
+    return null;
+  }
 
   if (!match) {
     const fallbackPage = snapshot.pagesByHref.get(adminConfig.defaultRoute);

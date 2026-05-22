@@ -1,5 +1,25 @@
 import type { WidgetDefinition } from "@/types/admin";
 
+import { AcademyCourseBuilderWidget } from "@/components/widgets/academy-course-builder-widget";
+import { AcademyCoursesBrowseWidget } from "@/components/widgets/academy-courses-browse-widget";
+import { AcademyCourseCategoriesWidget } from "@/components/widgets/academy-course-categories-widget";
+import { AcademyCourseReportsWidget } from "@/components/widgets/academy-course-reports-widget";
+import { AcademyCoursesDirectoryWidget } from "@/components/widgets/academy-courses-directory-widget";
+import { AcademyAttendanceWidget } from "@/components/widgets/academy-attendance-widget";
+import { AcademyEnrollmentsWidget } from "@/components/widgets/academy-enrollments-widget";
+import { AcademyInstructorPermissionsWidget } from "@/components/widgets/academy-instructor-permissions-widget";
+import { AcademyPeopleManagerWidget } from "@/components/widgets/academy-people-manager-widget";
+import { AcademyInstructorsDirectoryWidget } from "@/components/widgets/academy-instructors-directory-widget";
+import { AcademyLiveClassesWidget } from "@/components/widgets/academy-live-classes-widget";
+import { AcademyRevenueReportsWidget } from "@/components/widgets/academy-revenue-reports-widget";
+import { AcademyRolesPermissionsWidget } from "@/components/widgets/academy-roles-permissions-widget";
+import { AcademyScheduleClassWidget } from "@/components/widgets/academy-schedule-class-widget";
+import { AcademySettingsWidget } from "@/components/widgets/academy-settings-widget";
+import { AcademyStudentReportsWidget } from "@/components/widgets/academy-student-reports-widget";
+import { AcademyStudentsDirectoryWidget } from "@/components/widgets/academy-students-directory-widget";
+import { AcademySupportEnquiriesWidget } from "@/components/widgets/academy-support-enquiries-widget";
+import { AcademySupportFeedbackWidget } from "@/components/widgets/academy-support-feedback-widget";
+import { AcademySupportTicketsWidget } from "@/components/widgets/academy-support-tickets-widget";
 import { ChartWidget } from "@/components/widgets/chart-widget";
 import { ControlsShowcaseWidget } from "@/components/widgets/controls-showcase-widget";
 import { DataTableWidget } from "@/components/widgets/data-table-widget";
@@ -9,6 +29,26 @@ import { MetricWidget } from "@/components/widgets/metric-widget";
 import { TableWidget } from "@/components/widgets/table-widget";
 
 export const widgetRegistry: WidgetDefinition[] = [
+  { key: "academy-attendance", component: AcademyAttendanceWidget },
+  { key: "academy-course-builder", component: AcademyCourseBuilderWidget },
+  { key: "academy-courses-browse", component: AcademyCoursesBrowseWidget },
+  { key: "academy-course-categories", component: AcademyCourseCategoriesWidget },
+  { key: "academy-course-reports", component: AcademyCourseReportsWidget },
+  { key: "academy-courses-directory", component: AcademyCoursesDirectoryWidget },
+  { key: "academy-enrollments", component: AcademyEnrollmentsWidget },
+  { key: "academy-instructor-permissions", component: AcademyInstructorPermissionsWidget },
+  { key: "academy-people-manager", component: AcademyPeopleManagerWidget },
+  { key: "academy-instructors-directory", component: AcademyInstructorsDirectoryWidget },
+  { key: "academy-live-classes", component: AcademyLiveClassesWidget },
+  { key: "academy-revenue-reports", component: AcademyRevenueReportsWidget },
+  { key: "academy-roles-permissions", component: AcademyRolesPermissionsWidget },
+  { key: "academy-schedule-class", component: AcademyScheduleClassWidget },
+  { key: "academy-settings", component: AcademySettingsWidget },
+  { key: "academy-student-reports", component: AcademyStudentReportsWidget },
+  { key: "academy-students-directory", component: AcademyStudentsDirectoryWidget },
+  { key: "academy-support-enquiries", component: AcademySupportEnquiriesWidget },
+  { key: "academy-support-feedback", component: AcademySupportFeedbackWidget },
+  { key: "academy-support-tickets", component: AcademySupportTicketsWidget },
   { key: "metric", component: MetricWidget },
   { key: "list", component: ListWidget },
   { key: "chart", component: ChartWidget },

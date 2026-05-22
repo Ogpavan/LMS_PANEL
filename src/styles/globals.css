@@ -4,6 +4,7 @@
 
 :root {
   --font-sans: "Public Sans";
+  --font-heading: "Public Sans";
   --background: 240 22% 97%;
   --foreground: 252 10% 30%;
   --card: 0 0% 100%;
@@ -24,6 +25,7 @@
   --sidebar: 0 0% 100%;
   --sidebar-foreground: 252 10% 30%;
   --sidebar-muted: 240 27% 96%;
+  --brand-accent: #0f766e;
   --radius: 0.875rem;
 }
 
@@ -58,6 +60,10 @@ html {
 body {
   @apply min-h-screen bg-background font-sans text-[13px] font-normal leading-[20px] text-foreground antialiased;
   background: hsl(var(--background));
+}
+
+.font-heading {
+  font-family: var(--font-heading), var(--font-sans), ui-sans-serif, system-ui;
 }
 
 .dark body {

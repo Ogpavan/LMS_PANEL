@@ -1,0 +1,218 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  INSTRUCTOR
+  STUDENT
+}
+
+model ApiUser {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      UserRole @default(ADMIN)
+  permissions Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  loginEvents ApiLoginEvent[]
+
+  @@map("api_users")
+}
+
+model ApiLoginEvent {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  email     String
+  role      UserRole
+  createdAt DateTime @default(now()) @map("created_at")
+  user      ApiUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_login_events")
+}
+
+model Course {
+  id               Int      @id @default(autoincrement())
+  title            String
+  slug             String   @unique
+  category         String
+  instructor       String
+  shortDescription String   @default("")
+  description      String   @default("")
+  thumbnailUrl     String   @default("")
+  price            Int      @default(0)
+  currency         String   @default("INR")
+  level            String   @default("beginner")
+  durationLabel    String   @default("")
+  language         String   @default("English")
+  contentMode      String   @default("topic")
+  status           String   @default("draft")
+  visibility       String   @default("public")
+  featured         Boolean  @default(false)
+  createdAt        DateTime @default(now()) @map("created_at")
+  sections         CourseSection[]
+  enrollments      Enrollment[]
+
+  @@map("courses")
+}
+
+model CourseSection {
+  id         Int            @id @default(autoincrement())
+  courseId   Int            @map("course_id")
+  title      String
+  dayLabel   String         @default("")
+  orderIndex Int            @default(0) @map("order_index")
+  course     Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons    CourseLesson[]
+
+  @@map("course_sections")
+}
+
+model CourseLesson {
+  id            Int           @id @default(autoincrement())
+  sectionId     Int           @map("section_id")
+  title         String
+  summary       String        @default("")
+  videoUrl      String        @default("") @map("video_url")
+  thumbnailUrl  String        @default("") @map("thumbnail_url")
+  durationLabel String        @default("") @map("duration_label")
+  orderIndex    Int           @default(0) @map("order_index")
+  section       CourseSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@map("course_lessons")
+}
+
+model CourseCategory {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String   @default("")
+  status      String   @default("active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("course_categories")
+}
+
+model Student {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  program   String
+  progress  Int      @default(0)
+  status    String   @default("active")
+  createdAt DateTime @default(now()) @map("created_at")
+  enrollments Enrollment[]
+
+  @@map("students")
+}
+
+model Enrollment {
+  id         Int      @id @default(autoincrement())
+  studentId  Int      @map("student_id")
+  courseId   Int      @map("course_id")
+  status     String   @default("active")
+  createdAt  DateTime @default(now()) @map("created_at")
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, courseId])
+  @@map("enrollments")
+}
+
+model LiveClass {
+  id              Int      @id @default(autoincrement())
+  title           String
+  courseTitle     String   @default("") @map("course_title")
+  hostName        String   @default("") @map("host_name")
+  hostEmail       String   @default("") @map("host_email")
+  description     String   @default("")
+  meetUrl         String   @map("meet_url")
+  startsAt        DateTime @map("starts_at")
+  durationMinutes Int      @default(60) @map("duration_minutes")
+  status          String   @default("scheduled")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("live_classes")
+}
+
+model SupportEnquiry {
+  id         Int      @id @default(autoincrement())
+  name       String
+  email      String
+  phone      String   @default("")
+  topic      String
+  courseTitle String  @default("") @map("course_title")
+  channel    String   @default("email")
+  message    String   @default("")
+  status     String   @default("open")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("support_enquiries")
+}
+
+model SupportFeedback {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String
+  courseTitle String   @default("") @map("course_title")
+  category    String   @default("general")
+  rating      Int      @default(5)
+  message     String   @default("")
+  status      String   @default("pending")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("support_feedback")
+}
+
+model SupportTicket {
+  id             Int      @id @default(autoincrement())
+  ticketNumber   String   @unique @map("ticket_number")
+  subject        String
+  requesterName  String   @map("requester_name")
+  requesterEmail String   @map("requester_email")
+  assignedTo     String   @default("") @map("assigned_to")
+  priority       String   @default("medium")
+  channel        String   @default("portal")
+  details        String   @default("")
+  status         String   @default("open")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("support_tickets")
+}
+
+model LmsGeneralSetting {
+  id             Int      @id
+  lmsName        String   @map("lms_name")
+  supportEmail   String   @map("support_email")
+  supportContact String   @map("support_contact")
+  tagline        String   @default("")
+  primaryColor   String   @map("primary_color")
+  accentColor    String   @map("accent_color")
+  headingFont    String   @map("heading_font")
+  bodyFont       String   @map("body_font")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("lms_general_settings")
+}
+
+model LmsPaymentSetting {
+  id                   Int      @id
+  activeGateway        String   @map("active_gateway")
+  currency             String
+  taxMode              String   @map("tax_mode")
+  invoicePrefix        String   @map("invoice_prefix")
+  razorpayKeyId        String   @default("") @map("razorpay_key_id")
+  razorpayKeySecret    String   @default("") @map("razorpay_key_secret")
+  stripePublishableKey String   @default("") @map("stripe_publishable_key")
+  stripeSecretKey      String   @default("") @map("stripe_secret_key")
+  webhookSecret        String   @default("") @map("webhook_secret")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  @@map("lms_payment_settings")
+}

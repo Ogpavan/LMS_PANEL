@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   CircleEllipsis,
   ChevronDown,
@@ -8,19 +9,14 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Columns3,
   Eye,
   Pencil,
-  Search,
-  SlidersHorizontal,
   Trash2
 } from "lucide-react";
 import {
   type ColumnDef,
-  type ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   type SortingState,
@@ -34,7 +30,7 @@ import { cn } from "@/utils/cn";
 export interface RichTableColumn {
   key: string;
   header: string;
-  type?: "text" | "email" | "badge" | "currency" | "date";
+  type?: "text" | "email" | "badge" | "currency" | "date" | "highlight";
   sortable?: boolean;
   filterable?: boolean;
 }
@@ -44,61 +40,175 @@ export interface RichTableRow {
   [key: string]: string;
 }
 
-function RowActionsMenu() {
+export interface RichTableAction {
+  label: string;
+  onClick: (row: RichTableRow) => void;
+  icon?: "view" | "edit" | "delete";
+  tone?: "default" | "danger";
+  disabled?: boolean | ((row: RichTableRow) => boolean);
+}
+
+function RowActionsMenu({
+  row,
+  actions
+}: {
+  row: RichTableRow;
+  actions: RichTableAction[];
+}) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const updatePosition = () => {
+      const rect = buttonRef.current?.getBoundingClientRect();
+
+      if (!rect) {
+        return;
+      }
+
+      setPosition({
+        top: rect.bottom + 8,
+        left: rect.right - 160
+      });
+    };
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+
+      if (
+        !buttonRef.current?.contains(target) &&
+        !menuRef.current?.contains(target)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [open]);
 
   return (
     <div className="relative">
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setOpen((value) => !value)}
-        onBlur={() => {
-          window.setTimeout(() => setOpen(false), 120);
-        }}
         className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/70 bg-white text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         aria-label="Row actions"
       >
         <CircleEllipsis className="h-4 w-4" />
       </button>
 
-      {open ? (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-30 min-w-36 rounded-lg border border-border/70 bg-white p-1.5 shadow-lg">
-          <button
-            type="button"
-            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] font-medium leading-[20px] text-foreground hover:bg-muted"
-          >
-            <Eye className="h-4 w-4 text-muted-foreground" />
-            View
-          </button>
-          <button
-            type="button"
-            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] font-medium leading-[20px] text-foreground hover:bg-muted"
-          >
-            <Pencil className="h-4 w-4 text-muted-foreground" />
-            Edit
-          </button>
-          <button
-            type="button"
-            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] font-medium leading-[20px] text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10"
-          >
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </button>
-        </div>
-      ) : null}
+      {open && mounted && position
+        ? createPortal(
+            <div
+              ref={menuRef}
+              style={{
+                position: "fixed",
+                top: position.top,
+                left: Math.max(12, position.left)
+              }}
+              className="z-[120] min-w-40 rounded-md border border-border/70 bg-card p-1.5 shadow-[0_18px_42px_rgba(75,70,92,0.16)]"
+            >
+              {actions.map((action) => {
+                const disabled =
+                  typeof action.disabled === "function" ? action.disabled(row) : action.disabled;
+
+                return (
+                  <button
+                    key={action.label}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => {
+                      if (disabled) {
+                        return;
+                      }
+
+                      action.onClick(row);
+                      setOpen(false);
+                    }}
+                    className={cn(
+                      "flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] font-medium leading-[20px] transition-colors",
+                      action.tone === "danger"
+                        ? "text-rose-600 hover:bg-rose-50 disabled:text-rose-300 dark:hover:bg-rose-500/10"
+                        : "text-foreground hover:bg-muted/70 disabled:text-muted-foreground",
+                      disabled ? "cursor-not-allowed opacity-60" : ""
+                    )}
+                  >
+                    <ActionIcon icon={action.icon} tone={action.tone} />
+                    {action.label}
+                  </button>
+                );
+              })}
+            </div>,
+            document.body
+          )
+        : null}
     </div>
   );
 }
 
+function ActionIcon({
+  icon,
+  tone
+}: {
+  icon?: RichTableAction["icon"];
+  tone?: RichTableAction["tone"];
+}) {
+  const className = tone === "danger" ? "h-4 w-4" : "h-4 w-4 text-muted-foreground";
+
+  if (icon === "view") {
+    return <Eye className={className} />;
+  }
+
+  if (icon === "delete") {
+    return <Trash2 className={className} />;
+  }
+
+  return <Pencil className={className} />;
+}
+
 function TableBadge({ value }: { value: string }) {
+  const normalized = value.toLowerCase();
   const tone =
-    value.toLowerCase() === "active"
+    normalized === "active" || normalized === "enabled"
       ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
-      : value.toLowerCase() === "trial"
+      : normalized === "trial" ||
+          normalized === "pending" ||
+          normalized === "profile only"
         ? "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300"
-        : value.toLowerCase() === "paused"
+        : normalized === "paused"
           ? "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
-          : "bg-muted text-muted-foreground";
+          : normalized === "completed"
+            ? "bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300"
+            : "bg-muted text-muted-foreground";
 
   return <Badge className={tone}>{value}</Badge>;
 }
@@ -112,48 +222,30 @@ function formatCell(type: RichTableColumn["type"], value: string) {
     return value;
   }
 
+  if (type === "highlight") {
+    return (
+      <span className="font-semibold text-[hsl(var(--primary))]">
+        <span className="truncate">{value}</span>
+      </span>
+    );
+  }
+
   return value;
 }
 
 export function RichDataTable({
   columns,
-  rows
+  rows,
+  rowActions
 }: {
   columns: RichTableColumn[];
   rows: RichTableRow[];
+  rowActions?: RichTableAction[];
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [rowSelection, setRowSelection] = useState({});
 
   const tableColumns = useMemo<ColumnDef<RichTableRow>[]>(
     () => [
-      {
-        id: "select",
-        header: ({ table }) => (
-          <input
-            type="checkbox"
-            checked={table.getIsAllPageRowsSelected()}
-            onChange={table.getToggleAllPageRowsSelectedHandler()}
-            className="h-4 w-4 accent-[hsl(var(--primary))]"
-            aria-label="Select all rows"
-          />
-        ),
-        cell: ({ row }) => (
-          <input
-            type="checkbox"
-            checked={row.getIsSelected()}
-            disabled={!row.getCanSelect()}
-            onChange={row.getToggleSelectedHandler()}
-            className="h-4 w-4 accent-[hsl(var(--primary))]"
-            aria-label={`Select row ${row.id}`}
-          />
-        ),
-        enableSorting: false,
-        enableColumnFilter: false,
-        size: 48
-      },
       ...columns.map((column) => ({
         accessorKey: column.key,
         header: column.header,
@@ -167,127 +259,47 @@ export function RichDataTable({
         header: "Actions",
         enableSorting: false,
         enableColumnFilter: false,
-        cell: () => <RowActionsMenu />
+        cell: ({ row }: { row: { original: RichTableRow } }) =>
+          rowActions && rowActions.length > 0 ? <RowActionsMenu row={row.original} actions={rowActions} /> : null
       }
     ],
-    [columns]
+    [columns, rowActions]
   );
 
   const table = useReactTable({
     data: rows,
     columns: tableColumns,
     state: {
-      sorting,
-      columnFilters,
-      globalFilter,
-      rowSelection
+      sorting
     },
-    enableRowSelection: true,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
-    onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel()
   });
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-1 flex-wrap items-center gap-3">
-          <div className="flex min-h-10 min-w-[260px] items-center gap-2 rounded-lg border border-border/70 bg-white px-3 text-[13px] leading-[20px] text-muted-foreground">
-            <Search className="h-4 w-4" />
-            <input
-              value={globalFilter}
-              onChange={(event) => setGlobalFilter(event.target.value)}
-              placeholder="Search rows..."
-              className="w-full bg-transparent text-foreground outline-none"
-            />
-          </div>
-
-          <details className="relative">
-            <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-md border border-border/70 bg-white px-3 text-[15px] font-medium leading-[22px] text-foreground">
-              <Columns3 className="h-4 w-4" />
-              Columns
-              <ChevronDown className="h-4 w-4" />
-            </summary>
-            <div className="absolute left-0 top-[calc(100%+8px)] z-20 min-w-52 rounded-lg border border-border/70 bg-white p-2 shadow-lg">
-              {table
-                .getAllLeafColumns()
-                .filter((column) => column.id !== "select" && column.id !== "actions")
-                .map((column) => (
-                  <label
-                    key={column.id}
-                    className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-[13px] leading-[20px] hover:bg-muted"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={column.getIsVisible()}
-                      onChange={column.getToggleVisibilityHandler()}
-                      className="h-4 w-4 accent-[hsl(var(--primary))]"
-                    />
-                    {String(column.columnDef.header)}
-                  </label>
-                ))}
-            </div>
-          </details>
-
-          <div className="inline-flex min-h-10 items-center gap-2 rounded-md border border-border/70 bg-white px-3 text-[13px] font-normal leading-[20px] text-muted-foreground">
-            <SlidersHorizontal className="h-4 w-4" />
-            {table.getFilteredRowModel().rows.length} filtered rows
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Badge>{table.getSelectedRowModel().rows.length} selected</Badge>
-          <Button variant="outline" size="sm">
-            Export
-          </Button>
-          <Button size="sm">Add Row</Button>
-        </div>
-      </div>
-
-      <div className="grid gap-2.5 md:grid-cols-3">
-        {columns
-          .filter((column) => column.filterable)
-          .slice(0, 3)
-          .map((column) => {
-            const tableColumn = table.getColumn(column.key);
-            return (
-              <div key={column.key}>
-                <label className="mb-2 block text-[13px] font-normal leading-[20px] text-muted-foreground">
-                  Filter {column.header}
-                </label>
-                <input
-                  value={(tableColumn?.getFilterValue() as string) ?? ""}
-                  onChange={(event) => tableColumn?.setFilterValue(event.target.value)}
-                  className="min-h-9 w-full rounded-lg border border-border/70 bg-white px-3 text-[13px] leading-[20px] outline-none"
-                />
-              </div>
-            );
-          })}
-      </div>
-
-      <div className="overflow-hidden rounded-xl border border-border/70">
+      <div className="overflow-hidden rounded-md border border-border/70 bg-card shadow-[0_10px_30px_rgba(75,70,92,0.08)]">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[980px] border-collapse">
-            <thead className="bg-muted/40">
+            <thead className="bg-[linear-gradient(180deg,rgba(248,247,250,1),rgba(242,241,247,1))] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))]">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="border-b border-border/70 px-4 py-2.5 text-left text-[13px] font-medium uppercase leading-[20px] tracking-[0.4px] text-muted-foreground"
+                      className="border-b border-border/70 px-4 py-3 text-left text-[12px] font-semibold uppercase leading-[18px] tracking-[0.45px] text-muted-foreground"
                     >
                       {header.isPlaceholder ? null : (
                         <button
                           type="button"
                           onClick={header.column.getToggleSortingHandler()}
                           className={cn(
-                            "flex items-center gap-2",
-                            header.column.getCanSort() ? "cursor-pointer" : "cursor-default"
+                            "flex items-center gap-2 transition-colors",
+                            header.column.getCanSort()
+                              ? "cursor-pointer hover:text-foreground"
+                              : "cursor-default"
                           )}
                         >
                           <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
@@ -302,11 +314,17 @@ export function RichDataTable({
                 </tr>
               ))}
             </thead>
-            <tbody className="bg-white">
+            <tbody className="bg-card">
               {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="border-b border-border/50 last:border-0 hover:bg-muted/20">
+                <tr
+                  key={row.id}
+                  className={cn(
+                    "border-b border-border/50 transition-colors last:border-0 hover:bg-[rgba(115,103,240,0.04)] dark:hover:bg-white/5",
+                    ""
+                  )}
+                >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-2.5 text-[13px] font-normal leading-[20px] text-foreground">
+                    <td key={cell.id} className="px-4 py-3 text-[13px] font-normal leading-[20px] text-foreground">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
@@ -317,21 +335,21 @@ export function RichDataTable({
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-3 rounded-md border border-border/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,247,250,0.96))] px-4 py-3 lg:flex-row lg:items-center lg:justify-between dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))]">
         <div className="text-[13px] font-normal leading-[20px] text-muted-foreground">
           Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}-
           {Math.min(
             (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-            table.getFilteredRowModel().rows.length
+            rows.length
           )}{" "}
-          of {table.getFilteredRowModel().rows.length}
+          of {rows.length}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <select
             value={table.getState().pagination.pageSize}
             onChange={(event) => table.setPageSize(Number(event.target.value))}
-            className="min-h-9 rounded-md border border-border/70 bg-white px-3 text-[13px] leading-[20px]"
+            className="min-h-9 rounded-md border border-border/70 bg-card px-3 text-[13px] leading-[20px] shadow-[0_1px_0_rgba(0,0,0,0.03)]"
           >
             {[5, 10, 20, 30].map((size) => (
               <option key={size} value={size}>
@@ -356,7 +374,7 @@ export function RichDataTable({
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <div className="px-2 text-[13px] font-medium leading-[20px] text-foreground">
+          <div className="rounded-md bg-muted/50 px-3 py-1.5 text-[13px] font-medium leading-[20px] text-foreground">
             Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
           </div>
           <Button

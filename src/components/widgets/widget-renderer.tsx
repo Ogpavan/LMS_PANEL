@@ -7,6 +7,7 @@ import type { PageDefinition, WidgetInstanceConfig } from "@/types/admin";
 import { adminConfig } from "@/config/admin.config";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getRegistrySnapshot } from "@/services/registry-service";
+import { useAuthStore } from "@/store/auth-store";
 
 export const WidgetRenderer = memo(function WidgetRenderer({
   config,
@@ -15,9 +16,11 @@ export const WidgetRenderer = memo(function WidgetRenderer({
   config: WidgetInstanceConfig;
   page: PageDefinition;
 }) {
+  const role = useAuthStore((state) => state.user?.role ?? adminConfig.defaultRole);
+  const permissions = useAuthStore((state) => state.user?.permissions ?? null);
   const snapshot = useMemo(
-    () => getRegistrySnapshot(adminConfig.currentRole),
-    []
+    () => getRegistrySnapshot(role, permissions),
+    [permissions, role]
   );
   const widget = snapshot.widgets.get(config.widgetKey);
 

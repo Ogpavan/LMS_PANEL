@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 
-export type UserRole = "admin" | "manager" | "editor" | "viewer";
+export type UserRole = "admin" | "instructor" | "student";
 
 export type IconName = keyof typeof import("lucide-react");
 

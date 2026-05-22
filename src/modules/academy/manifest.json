@@ -3,100 +3,1127 @@
   "title": "Academy",
   "navigation": [
     {
-      "section": "Dashboards",
+      "section": "Learning Management",
       "items": [
         {
-          "title": "Academy",
-          "icon": "GraduationCap",
+          "title": "Dashboard",
+          "icon": "LayoutDashboard",
           "href": "/dashboard/academy",
-          "pageKey": "academy.overview"
+          "pageKey": "academy.dashboard",
+          "roles": ["admin", "instructor", "student"]
+        },
+        {
+          "title": "Courses",
+          "icon": "GraduationCap",
+          "children": [
+            {
+              "title": "Create Course",
+              "href": "/dashboard/academy/courses/create",
+              "pageKey": "academy.courses.create",
+              "roles": ["admin", "instructor"]
+            },
+            {
+              "title": "Browse Courses",
+              "href": "/dashboard/academy/courses/all",
+              "pageKey": "academy.courses.all",
+              "roles": ["admin", "instructor", "student"]
+            },
+            {
+              "title": "Categories",
+              "href": "/dashboard/academy/courses/categories",
+              "pageKey": "academy.courses.categories",
+              "roles": ["admin", "instructor"]
+            },
+            {
+              "title": "Certificates",
+              "href": "/dashboard/academy/courses/certificates",
+              "pageKey": "academy.courses.certificates",
+              "roles": ["admin", "instructor"]
+            }
+          ]
+        },
+        {
+          "title": "Classes",
+          "icon": "CalendarPlus",
+          "children": [
+            {
+              "title": "Live Classes",
+              "href": "/dashboard/academy/classes/live",
+              "pageKey": "academy.classes.live",
+              "roles": ["admin", "instructor", "student"]
+            },
+            {
+              "title": "Schedule Class",
+              "href": "/dashboard/academy/classes/schedule",
+              "pageKey": "academy.classes.schedule",
+              "roles": ["admin", "instructor"]
+            },
+            {
+              "title": "Attendance",
+              "href": "/dashboard/academy/classes/attendance",
+              "pageKey": "academy.classes.attendance",
+              "roles": ["admin", "instructor"]
+            }
+          ]
+        },
+        {
+          "title": "Assessments",
+          "icon": "ClipboardCheck",
+          "children": [
+            {
+              "title": "Assignments",
+              "href": "/dashboard/academy/assessments/assignments",
+              "pageKey": "academy.assessments.assignments",
+              "roles": ["admin", "instructor"]
+            },
+            {
+              "title": "Quizzes",
+              "href": "/dashboard/academy/assessments/quizzes",
+              "pageKey": "academy.assessments.quizzes",
+              "roles": ["admin", "instructor"]
+            },
+            {
+              "title": "Exams",
+              "href": "/dashboard/academy/assessments/exams",
+              "pageKey": "academy.assessments.exams",
+              "roles": ["admin", "instructor"]
+            },
+            {
+              "title": "Results",
+              "href": "/dashboard/academy/assessments/results",
+              "pageKey": "academy.assessments.results",
+              "roles": ["admin", "instructor", "student"]
+            }
+          ]
+        },
+        {
+          "title": "Students",
+          "icon": "Users",
+          "roles": ["admin", "instructor"],
+          "children": [
+            {
+              "title": "All Students",
+              "href": "/dashboard/academy/students/all",
+              "pageKey": "academy.students.all"
+            },
+            {
+              "title": "Create Student",
+              "href": "/dashboard/academy/students/create",
+              "pageKey": "academy.students.create"
+            },
+            {
+              "title": "Progress",
+              "href": "/dashboard/academy/students/progress",
+              "pageKey": "academy.students.progress"
+            },
+            {
+              "title": "Performance",
+              "href": "/dashboard/academy/students/performance",
+              "pageKey": "academy.students.performance"
+            }
+          ]
+        },
+        {
+          "title": "Instructors",
+          "icon": "UserCog",
+          "roles": ["admin"],
+          "children": [
+            {
+              "title": "All Instructors",
+              "href": "/dashboard/academy/instructors/all",
+              "pageKey": "academy.instructors.all"
+            },
+            {
+              "title": "Create Instructor",
+              "href": "/dashboard/academy/instructors/create",
+              "pageKey": "academy.instructors.create"
+            },
+            {
+              "title": "Permissions",
+              "href": "/dashboard/academy/instructors/permissions",
+              "pageKey": "academy.instructors.permissions"
+            }
+          ]
+        },
+        {
+          "title": "Enrollments",
+          "icon": "UserPlus",
+          "href": "/dashboard/academy/enrollments",
+          "pageKey": "academy.enrollments",
+          "roles": ["admin", "instructor"]
+        },
+        {
+          "title": "Communication",
+          "icon": "MessageSquare",
+          "children": [
+            {
+              "title": "Discussions",
+              "href": "/dashboard/academy/communication/discussions",
+              "pageKey": "academy.communication.discussions",
+              "roles": ["admin", "instructor", "student"]
+            },
+            {
+              "title": "Announcements",
+              "href": "/dashboard/academy/communication/announcements",
+              "pageKey": "academy.communication.announcements",
+              "roles": ["admin", "instructor", "student"]
+            },
+            {
+              "title": "Messages",
+              "href": "/dashboard/academy/communication/messages",
+              "pageKey": "academy.communication.messages",
+              "roles": ["admin", "instructor", "student"]
+            }
+          ]
+        },
+        {
+          "title": "Analytics",
+          "icon": "BarChart3",
+          "roles": ["admin", "instructor"],
+          "children": [
+            {
+              "title": "Course Reports",
+              "href": "/dashboard/academy/analytics/course-reports",
+              "pageKey": "academy.analytics.course-reports"
+            },
+            {
+              "title": "Student Reports",
+              "href": "/dashboard/academy/analytics/student-reports",
+              "pageKey": "academy.analytics.student-reports"
+            },
+            {
+              "title": "Revenue Reports",
+              "href": "/dashboard/academy/analytics/revenue-reports",
+              "pageKey": "academy.analytics.revenue-reports"
+            }
+          ]
+        },
+        {
+          "title": "Support",
+          "icon": "Ticket",
+          "roles": ["admin"],
+          "children": [
+            {
+              "title": "Enquiries",
+              "href": "/dashboard/academy/support/enquiries",
+              "pageKey": "academy.support.enquiries"
+            },
+            {
+              "title": "Feedback",
+              "href": "/dashboard/academy/support/feedback",
+              "pageKey": "academy.support.feedback"
+            }
+          ]
+        },
+        {
+          "title": "Administration",
+          "icon": "ShieldCheck",
+          "roles": ["admin"],
+          "children": [
+            {
+              "title": "Settings",
+              "href": "/dashboard/academy/administration/settings",
+              "pageKey": "academy.administration.settings"
+            },
+            {
+              "title": "Roles & Permissions",
+              "href": "/dashboard/academy/administration/roles-permissions",
+              "pageKey": "academy.administration.roles-permissions"
+            },
+            {
+              "title": "Integrations",
+              "href": "/dashboard/academy/administration/integrations",
+              "pageKey": "academy.administration.integrations"
+            },
+            {
+              "title": "Notifications",
+              "href": "/dashboard/academy/administration/notifications",
+              "pageKey": "academy.administration.notifications"
+            }
+          ]
         }
       ]
     }
   ],
   "pages": [
     {
-      "key": "academy.overview",
-      "title": "Academy",
+      "key": "academy.dashboard",
+      "title": "Dashboard",
       "href": "/dashboard/academy",
       "moduleKey": "academy",
-      "icon": "GraduationCap",
+      "icon": "LayoutDashboard",
       "description": "Learning operations at a glance.",
       "layoutKey": "overview",
       "widgets": [
         {
-          "id": "academy-hero",
+          "id": "academy-dashboard-hero",
           "widgetKey": "hero",
-          "title": "Academy command center",
+          "title": "Learning command center",
+          "description": "Track courses, classes, learner progress, and revenue from one place.",
           "size": "full",
           "props": {
-            "pills": ["Programs", "Engagement", "Curriculum", "Performance"]
+            "eyebrow": "Admin overview",
+            "pills": ["Courses", "Classes", "Students", "Analytics"]
           }
         },
         {
-          "id": "academy-learners",
+          "id": "academy-active-courses",
           "widgetKey": "metric",
-          "title": "Active learners",
+          "title": "Active courses",
           "size": "sm",
           "props": {
-            "value": "12.4k",
-            "delta": "+18%",
-            "caption": "Monthly active students"
+            "value": "128",
+            "delta": "+12%",
+            "caption": "Published this quarter"
           }
         },
         {
-          "id": "academy-course-rate",
+          "id": "academy-live-classes",
           "widgetKey": "metric",
-          "title": "Completion rate",
+          "title": "Live classes",
           "size": "sm",
           "props": {
-            "value": "84%",
-            "delta": "+6%",
-            "caption": "Across all cohorts"
+            "value": "24",
+            "delta": "+5%",
+            "caption": "Running this week"
           }
         },
         {
-          "id": "academy-sessions",
+          "id": "academy-total-students",
           "widgetKey": "metric",
-          "title": "Live sessions",
+          "title": "Total students",
           "size": "sm",
           "props": {
-            "value": "46",
+            "value": "18.2k",
             "delta": "+9%",
-            "caption": "Scheduled this week"
+            "caption": "Across all programs"
           }
         },
         {
-          "id": "academy-trend",
+          "id": "academy-enrollment-trend",
           "widgetKey": "chart",
           "title": "Enrollment trend",
           "size": "xl",
           "props": {
-            "points": [44, 58, 62, 71, 76, 82, 88, 96]
+            "points": [42, 51, 56, 63, 74, 82, 89, 97]
           }
         },
         {
-          "id": "academy-activity",
+          "id": "academy-priority-items",
           "widgetKey": "list",
-          "title": "Cohort activity",
+          "title": "Priority items",
           "size": "lg",
           "props": {
             "rows": [
               {
-                "label": "Frontend Mastery",
-                "value": "128 learners active",
-                "tone": "Healthy"
+                "label": "Certificates pending",
+                "value": "84 learners awaiting issuance",
+                "tone": "Review"
               },
               {
-                "label": "Product Leadership",
-                "value": "94 learners active",
-                "tone": "Rising"
+                "label": "Attendance follow-up",
+                "value": "6 classes below threshold",
+                "tone": "Investigate"
               },
               {
-                "label": "AI Foundations",
-                "value": "176 learners active",
-                "tone": "High demand"
+                "label": "Support backlog",
+                "value": "14 unresolved tickets",
+                "tone": "Respond"
               }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.courses.all",
+      "title": "Browse Courses",
+      "href": "/dashboard/academy/courses/all",
+      "moduleKey": "academy",
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-courses-all-table",
+          "widgetKey": "academy-courses-browse",
+          "title": "Course catalog",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.courses.create",
+      "title": "Create Course",
+      "href": "/dashboard/academy/courses/create",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-courses-create-list",
+          "widgetKey": "academy-course-builder",
+          "title": "Course builder",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.courses.categories",
+      "title": "Categories",
+      "href": "/dashboard/academy/courses/categories",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-courses-categories-list",
+          "widgetKey": "academy-course-categories",
+          "title": "Course categories",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.courses.certificates",
+      "title": "Certificates",
+      "href": "/dashboard/academy/courses/certificates",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-courses-certificates-table",
+          "widgetKey": "table",
+          "title": "Certificate queue",
+          "size": "full",
+          "props": {
+            "columns": [
+              { "key": "template", "label": "Template" },
+              { "key": "course", "label": "Course" },
+              { "key": "issued", "label": "Issued" },
+              { "key": "status", "label": "Status" }
+            ],
+            "rows": [
+              { "template": "Completion Pro", "course": "Frontend Mastery", "issued": "320", "status": "Active" },
+              { "template": "Leadership Gold", "course": "Team Management", "issued": "114", "status": "Active" },
+              { "template": "AI Certificate", "course": "AI Foundations", "issued": "208", "status": "Pending review" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.classes.live",
+      "title": "Live Classes",
+      "href": "/dashboard/academy/classes/live",
+      "moduleKey": "academy",
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-classes-live",
+          "widgetKey": "academy-live-classes",
+          "title": "Live classes",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.classes.schedule",
+      "title": "Schedule Class",
+      "href": "/dashboard/academy/classes/schedule",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-classes-schedule",
+          "widgetKey": "academy-schedule-class",
+          "title": "Schedule class",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.classes.attendance",
+      "title": "Attendance",
+      "href": "/dashboard/academy/classes/attendance",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-classes-attendance",
+          "widgetKey": "academy-attendance",
+          "title": "Attendance",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.assessments.assignments",
+      "title": "Assignments",
+      "href": "/dashboard/academy/assessments/assignments",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-assessments-assignments-table",
+          "widgetKey": "table",
+          "title": "Assignment tracker",
+          "size": "full",
+          "props": {
+            "columns": [
+              { "key": "assignment", "label": "Assignment" },
+              { "key": "course", "label": "Course" },
+              { "key": "due", "label": "Due date" },
+              { "key": "status", "label": "Status" }
+            ],
+            "rows": [
+              { "assignment": "Capstone Build", "course": "Frontend Mastery", "due": "May 22", "status": "Open" },
+              { "assignment": "Dashboard Review", "course": "Product Analytics", "due": "May 24", "status": "Draft" },
+              { "assignment": "Model Prompt Pack", "course": "AI Foundations", "due": "May 27", "status": "Open" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.assessments.quizzes",
+      "title": "Quizzes",
+      "href": "/dashboard/academy/assessments/quizzes",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-assessments-quizzes-list",
+          "widgetKey": "list",
+          "title": "Quiz activity",
+          "props": {
+            "rows": [
+              { "label": "Weekly frontend quiz", "value": "318 submissions received", "tone": "Review" },
+              { "label": "SQL checkpoint", "value": "Average score 82%", "tone": "Analyze" },
+              { "label": "AI concepts quiz", "value": "Publishes tomorrow", "tone": "Prepare" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.assessments.exams",
+      "title": "Exams",
+      "href": "/dashboard/academy/assessments/exams",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-assessments-exams-table",
+          "widgetKey": "table",
+          "title": "Exam calendar",
+          "size": "full",
+          "props": {
+            "columns": [
+              { "key": "exam", "label": "Exam" },
+              { "key": "batch", "label": "Batch" },
+              { "key": "date", "label": "Date" },
+              { "key": "mode", "label": "Mode" }
+            ],
+            "rows": [
+              { "exam": "Frontend Final", "batch": "Cohort 12", "date": "May 30", "mode": "Online" },
+              { "exam": "Analytics Midterm", "batch": "Cohort 7", "date": "Jun 02", "mode": "Hybrid" },
+              { "exam": "AI Assessment", "batch": "Cohort 4", "date": "Jun 05", "mode": "Online" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.assessments.results",
+      "title": "Results",
+      "href": "/dashboard/academy/assessments/results",
+      "moduleKey": "academy",
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-assessments-results-table",
+          "widgetKey": "table",
+          "title": "Recent results",
+          "size": "full",
+          "props": {
+            "columns": [
+              { "key": "assessment", "label": "Assessment" },
+              { "key": "attempts", "label": "Attempts" },
+              { "key": "average", "label": "Average" },
+              { "key": "status", "label": "Status" }
+            ],
+            "rows": [
+              { "assessment": "Frontend Sprint 3", "attempts": "284", "average": "86%", "status": "Published" },
+              { "assessment": "SQL checkpoint", "attempts": "198", "average": "82%", "status": "Published" },
+              { "assessment": "AI concepts quiz", "attempts": "0", "average": "-", "status": "Scheduled" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.students.all",
+      "title": "All Students",
+      "href": "/dashboard/academy/students/all",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-students-all-table",
+          "widgetKey": "academy-students-directory",
+          "title": "Student directory",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.students.create",
+      "title": "Create Student",
+      "href": "/dashboard/academy/students/create",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "description": "Create learner records and optionally provision portal access.",
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-students-create-manager",
+          "widgetKey": "academy-people-manager",
+          "title": "Student intake desk",
+          "size": "full",
+          "props": {
+            "variant": "student"
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.students.progress",
+      "title": "Progress",
+      "href": "/dashboard/academy/students/progress",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-students-progress-list",
+          "widgetKey": "list",
+          "title": "Progress checkpoints",
+          "props": {
+            "rows": [
+              { "label": "On-track learners", "value": "1,284 students above 70%", "tone": "View" },
+              { "label": "At-risk learners", "value": "116 students below 40%", "tone": "Intervene" },
+              { "label": "Completed this week", "value": "74 learners finished programs", "tone": "Celebrate" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.students.performance",
+      "title": "Performance",
+      "href": "/dashboard/academy/students/performance",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-students-performance-table",
+          "widgetKey": "table",
+          "title": "Performance leaderboard",
+          "size": "full",
+          "props": {
+            "columns": [
+              { "key": "student", "label": "Student" },
+              { "key": "program", "label": "Program" },
+              { "key": "score", "label": "Score" },
+              { "key": "rank", "label": "Rank" }
+            ],
+            "rows": [
+              { "student": "Sara Khan", "program": "AI Foundations", "score": "96%", "rank": "#1" },
+              { "student": "Ira Shah", "program": "Frontend Mastery", "score": "93%", "rank": "#2" },
+              { "student": "Dev Patel", "program": "Product Analytics", "score": "91%", "rank": "#3" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.instructors.all",
+      "title": "All Instructors",
+      "href": "/dashboard/academy/instructors/all",
+      "moduleKey": "academy",
+      "roles": ["admin"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-instructors-all-table",
+          "widgetKey": "academy-instructors-directory",
+          "title": "Instructor roster",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.instructors.create",
+      "title": "Create Instructor",
+      "href": "/dashboard/academy/instructors/create",
+      "moduleKey": "academy",
+      "roles": ["admin"],
+      "description": "Provision instructor accounts with LMS access.",
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-instructors-create-manager",
+          "widgetKey": "academy-people-manager",
+          "title": "Instructor onboarding",
+          "size": "full",
+          "props": {
+            "variant": "instructor"
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.instructors.permissions",
+      "title": "Permissions",
+      "href": "/dashboard/academy/instructors/permissions",
+      "moduleKey": "academy",
+      "roles": ["admin"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-instructors-permissions",
+          "widgetKey": "academy-instructor-permissions",
+          "title": "Instructor permissions",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.enrollments",
+      "title": "Enrollments",
+      "href": "/dashboard/academy/enrollments",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-enrollments",
+          "widgetKey": "academy-enrollments",
+          "title": "Enrollments",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.communication.discussions",
+      "title": "Discussions",
+      "href": "/dashboard/academy/communication/discussions",
+      "moduleKey": "academy",
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-communication-discussions-list",
+          "widgetKey": "list",
+          "title": "Active discussions",
+          "props": {
+            "rows": [
+              { "label": "Sprint review thread", "value": "42 replies in Frontend Mastery", "tone": "Moderate" },
+              { "label": "Exam prep Q&A", "value": "18 unresolved questions", "tone": "Respond" },
+              { "label": "Cohort introductions", "value": "67 new participant posts", "tone": "Engage" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.communication.announcements",
+      "title": "Announcements",
+      "href": "/dashboard/academy/communication/announcements",
+      "moduleKey": "academy",
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-communication-announcements-table",
+          "widgetKey": "table",
+          "title": "Announcement log",
+          "size": "full",
+          "props": {
+            "columns": [
+              { "key": "title", "label": "Title" },
+              { "key": "audience", "label": "Audience" },
+              { "key": "sent", "label": "Sent" },
+              { "key": "status", "label": "Status" }
+            ],
+            "rows": [
+              { "title": "May cohort kickoff", "audience": "All students", "sent": "May 10", "status": "Delivered" },
+              { "title": "Exam schedule update", "audience": "Cohort 12", "sent": "May 13", "status": "Delivered" },
+              { "title": "Platform maintenance", "audience": "All users", "sent": "May 16", "status": "Scheduled" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.communication.messages",
+      "title": "Messages",
+      "href": "/dashboard/academy/communication/messages",
+      "moduleKey": "academy",
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-communication-messages-list",
+          "widgetKey": "list",
+          "title": "Inbox overview",
+          "props": {
+            "rows": [
+              { "label": "Unread student messages", "value": "29 awaiting response", "tone": "Open" },
+              { "label": "Instructor requests", "value": "7 access change requests", "tone": "Review" },
+              { "label": "Automated reminders", "value": "132 queued for today", "tone": "Check" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.analytics.course-reports",
+      "title": "Course Reports",
+      "href": "/dashboard/academy/analytics/course-reports",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-analytics-course-reports-table",
+          "widgetKey": "academy-course-reports",
+          "title": "Course performance reports",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.analytics.student-reports",
+      "title": "Student Reports",
+      "href": "/dashboard/academy/analytics/student-reports",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-analytics-student-reports-list",
+          "widgetKey": "academy-student-reports",
+          "title": "Student reports",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.analytics.revenue-reports",
+      "title": "Revenue Reports",
+      "href": "/dashboard/academy/analytics/revenue-reports",
+      "moduleKey": "academy",
+      "roles": ["admin", "instructor"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-analytics-revenue-reports-table",
+          "widgetKey": "academy-revenue-reports",
+          "title": "Revenue summary",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.support.enquiries",
+      "title": "Enquiries",
+      "href": "/dashboard/academy/support/enquiries",
+      "moduleKey": "academy",
+      "roles": ["admin"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-support-enquiries-table",
+          "widgetKey": "academy-support-enquiries",
+          "title": "Incoming enquiries",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.support.feedback",
+      "title": "Feedback",
+      "href": "/dashboard/academy/support/feedback",
+      "moduleKey": "academy",
+      "roles": ["admin"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-support-feedback-list",
+          "widgetKey": "academy-support-feedback",
+          "title": "Latest feedback",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.support.tickets",
+      "title": "Tickets",
+      "href": "/dashboard/academy/support/tickets",
+      "moduleKey": "academy",
+      "roles": ["admin"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-support-tickets-table",
+          "widgetKey": "academy-support-tickets",
+          "title": "Support tickets",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.profile",
+      "title": "Profile",
+      "href": "/dashboard/academy/profile",
+      "moduleKey": "academy",
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-profile-overview",
+          "widgetKey": "list",
+          "title": "Profile overview",
+          "props": {
+            "rows": [
+              { "label": "Name", "value": "Admin User", "tone": "Edit" },
+              { "label": "Email", "value": "admin@demo.com", "tone": "Verify" },
+              { "label": "Role", "value": "Platform administrator", "tone": "Manage" }
+            ]
+          }
+        },
+        {
+          "id": "academy-profile-preferences",
+          "widgetKey": "table",
+          "title": "Account details",
+          "size": "full",
+          "props": {
+            "columns": [
+              { "key": "field", "label": "Field" },
+              { "key": "value", "label": "Value" },
+              { "key": "status", "label": "Status" }
+            ],
+            "rows": [
+              { "field": "Phone", "value": "+91 98765 43210", "status": "Updated" },
+              { "field": "Department", "value": "Operations", "status": "Active" },
+              { "field": "Two-factor authentication", "value": "Enabled", "status": "Secure" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.settings",
+      "title": "Settings",
+      "href": "/dashboard/academy/settings",
+      "moduleKey": "academy",
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-settings-preferences",
+          "widgetKey": "list",
+          "title": "Personal settings",
+          "props": {
+            "rows": [
+              { "label": "Theme preference", "value": "Light or dark mode", "tone": "Change" },
+              { "label": "Email notifications", "value": "Assignment, ticket, and system alerts", "tone": "Manage" },
+              { "label": "Session security", "value": "Devices and sign-in activity", "tone": "Review" }
+            ]
+          }
+        },
+        {
+          "id": "academy-settings-controls",
+          "widgetKey": "table",
+          "title": "Settings summary",
+          "size": "full",
+          "props": {
+            "columns": [
+              { "key": "setting", "label": "Setting" },
+              { "key": "value", "label": "Current value" },
+              { "key": "status", "label": "Status" }
+            ],
+            "rows": [
+              { "setting": "Language", "value": "English", "status": "Active" },
+              { "setting": "Timezone", "value": "Asia/Kolkata", "status": "Synced" },
+              { "setting": "Notification digest", "value": "Daily", "status": "Enabled" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.billing",
+      "title": "Billing Plan",
+      "href": "/dashboard/academy/billing",
+      "moduleKey": "academy",
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-billing-plan-list",
+          "widgetKey": "list",
+          "title": "Current billing plan",
+          "props": {
+            "rows": [
+              { "label": "Plan", "value": "Enterprise Admin Suite", "tone": "Upgrade" },
+              { "label": "Renewal date", "value": "June 15, 2026", "tone": "Review" },
+              { "label": "Pending invoices", "value": "4 invoices need approval", "tone": "Pay" }
+            ]
+          }
+        },
+        {
+          "id": "academy-billing-summary-table",
+          "widgetKey": "table",
+          "title": "Billing summary",
+          "size": "full",
+          "props": {
+            "columns": [
+              { "key": "item", "label": "Item" },
+              { "key": "amount", "label": "Amount" },
+              { "key": "status", "label": "Status" }
+            ],
+            "rows": [
+              { "item": "Platform subscription", "amount": "$499 / month", "status": "Active" },
+              { "item": "Additional instructors", "amount": "$120 / month", "status": "Active" },
+              { "item": "Open invoices", "amount": "$1,240", "status": "Pending" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.pricing",
+      "title": "Pricing",
+      "href": "/dashboard/academy/pricing",
+      "moduleKey": "academy",
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-pricing-tiers-list",
+          "widgetKey": "list",
+          "title": "Available plans",
+          "props": {
+            "rows": [
+              { "label": "Starter", "value": "For small teaching teams", "tone": "$49/mo" },
+              { "label": "Growth", "value": "For expanding academies", "tone": "$149/mo" },
+              { "label": "Enterprise", "value": "Advanced controls and support", "tone": "$499/mo" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.faq",
+      "title": "FAQ",
+      "href": "/dashboard/academy/faq",
+      "moduleKey": "academy",
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-faq-list",
+          "widgetKey": "list",
+          "title": "Frequently asked questions",
+          "props": {
+            "rows": [
+              { "label": "How do I reset passwords?", "value": "Use account security settings from the profile menu.", "tone": "Guide" },
+              { "label": "How do I manage billing?", "value": "Open Billing Plan to review invoices and subscriptions.", "tone": "Guide" },
+              { "label": "Where do I change notifications?", "value": "Open Settings to update alerts and delivery channels.", "tone": "Guide" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.administration.settings",
+      "title": "Settings",
+      "href": "/dashboard/academy/administration/settings",
+      "moduleKey": "academy",
+      "roles": ["admin"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-administration-settings-list",
+          "widgetKey": "academy-settings",
+          "title": "LMS Settings",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.administration.roles-permissions",
+      "title": "Roles & Permissions",
+      "href": "/dashboard/academy/administration/roles-permissions",
+      "moduleKey": "academy",
+      "roles": ["admin"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-administration-roles-table",
+          "widgetKey": "academy-roles-permissions",
+          "title": "Roles & permissions",
+          "size": "full"
+        }
+      ]
+    },
+    {
+      "key": "academy.administration.integrations",
+      "title": "Integrations",
+      "href": "/dashboard/academy/administration/integrations",
+      "moduleKey": "academy",
+      "roles": ["admin"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-administration-integrations-list",
+          "widgetKey": "list",
+          "title": "Connected systems",
+          "props": {
+            "rows": [
+              { "label": "Zoom", "value": "Used for live classes and recordings", "tone": "Connected" },
+              { "label": "Stripe", "value": "Handles payments and invoices", "tone": "Connected" },
+              { "label": "Slack", "value": "Internal teaching notifications", "tone": "Review" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "academy.administration.notifications",
+      "title": "Notifications",
+      "href": "/dashboard/academy/administration/notifications",
+      "moduleKey": "academy",
+      "roles": ["admin"],
+      "layoutKey": "stack",
+      "widgets": [
+        {
+          "id": "academy-administration-notifications-table",
+          "widgetKey": "table",
+          "title": "Notification rules",
+          "size": "full",
+          "props": {
+            "columns": [
+              { "key": "event", "label": "Event" },
+              { "key": "channel", "label": "Channel" },
+              { "key": "audience", "label": "Audience" },
+              { "key": "status", "label": "Status" }
+            ],
+            "rows": [
+              { "event": "Class reminder", "channel": "Email", "audience": "Students", "status": "Enabled" },
+              { "event": "Assignment graded", "channel": "In-app", "audience": "Students", "status": "Enabled" },
+              { "event": "Ticket assigned", "channel": "Slack", "audience": "Support team", "status": "Enabled" }
             ]
           }
         }

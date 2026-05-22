@@ -9,8 +9,9 @@ import { ChevronDown } from "lucide-react";
 import type { SidebarItemConfig } from "@/types/admin";
 
 import { Badge } from "@/components/ui/badge";
+import { useSidebarStore } from "@/store/sidebar-store";
 import { cn } from "@/utils/cn";
-import { resolveIcon } from "@/utils/icons";
+import { resolveContextualIcon, resolveIcon } from "@/utils/icons";
 
 interface SidebarItemProps {
   item: SidebarItemConfig;
@@ -28,6 +29,12 @@ export const SidebarItem = memo(function SidebarItem({
   const pathname = usePathname();
   const itemRef = useRef<HTMLDivElement | null>(null);
   const Icon = resolveIcon(item.icon);
+  const ItemIcon = resolveContextualIcon(item.title, item.icon);
+  const DisplayIcon = depth > 0 ? ItemIcon : Icon;
+  const itemKey = item.href ?? item.pageKey ?? item.title;
+  const openGroupKey = useSidebarStore((state) => state.openGroupKey);
+  const toggleGroup = useSidebarStore((state) => state.toggleGroup);
+  const setOpenGroup = useSidebarStore((state) => state.setOpenGroup);
   const isActive = item.href ? pathname === item.href : false;
   const hasActiveChild = useMemo(
     () => item.children?.some((child) => pathname?.startsWith(child.href ?? "")) ?? false,
@@ -39,6 +46,25 @@ export const SidebarItem = memo(function SidebarItem({
   const [arrowTop, setArrowTop] = useState<number | null>(null);
   const [flyoutLeft, setFlyoutLeft] = useState<number | null>(null);
   const showCollapsedFlyout = collapsed && depth === 0;
+  const isAccordionGroup = depth === 0 && Boolean(item.children?.length);
+
+  useEffect(() => {
+    if (!isAccordionGroup || !hasActiveChild) return;
+    setOpenGroup(itemKey);
+  }, [hasActiveChild, isAccordionGroup, itemKey, setOpenGroup]);
+
+  useEffect(() => {
+    if (!item.children?.length) return;
+
+    if (isAccordionGroup) {
+      setOpen(openGroupKey === itemKey);
+      return;
+    }
+
+    if (hasActiveChild) {
+      setOpen(true);
+    }
+  }, [hasActiveChild, isAccordionGroup, item.children?.length, itemKey, openGroupKey]);
 
   useEffect(() => {
     if (!showCollapsedFlyout || !hovered || !itemRef.current) return;
@@ -81,7 +107,7 @@ export const SidebarItem = memo(function SidebarItem({
         <div className="relative mt-2 space-y-1 border-t border-border/70 pt-2">
           {item.children.map((child) => {
             const childActive = pathname === child.href;
-            const ChildIcon = resolveIcon(child.icon);
+            const ChildIcon = resolveContextualIcon(child.title, child.icon);
 
             return (
               <Link
@@ -120,7 +146,14 @@ export const SidebarItem = memo(function SidebarItem({
       >
         <button
           type="button"
-          onClick={() => setOpen((value) => !value)}
+          onClick={() => {
+            if (isAccordionGroup) {
+              toggleGroup(itemKey);
+              return;
+            }
+
+            setOpen((value) => !value);
+          }}
           className={cn(
             "flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-left text-[15px] font-medium leading-[22px] transition-colors",
             hasActiveChild
@@ -129,7 +162,7 @@ export const SidebarItem = memo(function SidebarItem({
             collapsed && "justify-center px-2"
           )}
         >
-          <Icon className="h-[18px] w-[18px] shrink-0" />
+          <DisplayIcon className="h-[18px] w-[18px] shrink-0" />
           {!collapsed ? (
             <>
               <span className="flex-1 truncate">{item.title}</span>
@@ -185,7 +218,7 @@ export const SidebarItem = memo(function SidebarItem({
           depth > 0 && "text-[13px] leading-[20px]"
         )}
       >
-        <Icon className="h-[18px] w-[18px] shrink-0" />
+        <DisplayIcon className="h-[18px] w-[18px] shrink-0" />
         {!collapsed ? (
           <>
             <span className="flex-1 truncate">{item.title}</span>

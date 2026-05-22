@@ -3,14 +3,22 @@ import type { RegistrySnapshot, UserRole } from "@/types/admin";
 
 const cache = new Map<string, RegistrySnapshot>();
 
-export function getRegistrySnapshot(role: UserRole = "admin") {
-  const cached = cache.get(role);
+function getCacheKey(role: UserRole, permissions?: string[] | null) {
+  const normalizedPermissions =
+    role === "instructor" && permissions ? [...permissions].sort().join("|") : "";
+
+  return `${role}::${normalizedPermissions}`;
+}
+
+export function getRegistrySnapshot(role: UserRole = "admin", permissions?: string[] | null) {
+  const cacheKey = getCacheKey(role, permissions);
+  const cached = cache.get(cacheKey);
   if (cached) {
     return cached;
   }
 
-  const snapshot = createRegistrySnapshot(role);
-  cache.set(role, snapshot);
+  const snapshot = createRegistrySnapshot(role, permissions);
+  cache.set(cacheKey, snapshot);
   return snapshot;
 }
 
