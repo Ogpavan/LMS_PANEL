@@ -107,11 +107,6 @@
               "pageKey": "academy.students.all"
             },
             {
-              "title": "Create Student",
-              "href": "/dashboard/academy/students/create",
-              "pageKey": "academy.students.create"
-            },
-            {
               "title": "Progress",
               "href": "/dashboard/academy/students/progress",
               "pageKey": "academy.students.progress"
@@ -579,26 +574,6 @@
           "widgetKey": "academy-students-directory",
           "title": "Student directory",
           "size": "full"
-        }
-      ]
-    },
-    {
-      "key": "academy.students.create",
-      "title": "Create Student",
-      "href": "/dashboard/academy/students/create",
-      "moduleKey": "academy",
-      "roles": ["admin", "instructor"],
-      "description": "Create learner records and optionally provision portal access.",
-      "layoutKey": "stack",
-      "widgets": [
-        {
-          "id": "academy-students-create-manager",
-          "widgetKey": "academy-people-manager",
-          "title": "Student intake desk",
-          "size": "full",
-          "props": {
-            "variant": "student"
-          }
         }
       ]
     },

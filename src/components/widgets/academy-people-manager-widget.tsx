@@ -277,7 +277,7 @@ export function AcademyPeopleManagerWidget({ config }: WidgetRendererProps) {
                     options={[
                       { label: "Active", value: "active" },
                       { label: "Pending", value: "pending" },
-                      { label: "Completed", value: "completed" }
+                      { label: "Blocked", value: "blocked" }
                     ]}
                     onChange={(value) =>
                       setStudentForm((current) => ({ ...current, status: value }))

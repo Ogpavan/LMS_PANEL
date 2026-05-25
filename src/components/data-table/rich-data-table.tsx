@@ -22,6 +22,7 @@ import {
   type SortingState,
   useReactTable
 } from "@tanstack/react-table";
+import type { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export interface RichTableColumn {
   type?: "text" | "email" | "badge" | "currency" | "date" | "highlight";
   sortable?: boolean;
   filterable?: boolean;
+  render?: (row: RichTableRow) => ReactNode;
 }
 
 export interface RichTableRow {
@@ -42,10 +44,13 @@ export interface RichTableRow {
 
 export interface RichTableAction {
   label: string;
-  onClick: (row: RichTableRow) => void;
+  onClick: (row: RichTableRow, value?: string) => void;
   icon?: "view" | "edit" | "delete";
   tone?: "default" | "danger";
   disabled?: boolean | ((row: RichTableRow) => boolean);
+  kind?: "button" | "status";
+  options?: { label: string; value: string }[];
+  defaultValue?: string;
 }
 
 function RowActionsMenu({
@@ -58,12 +63,23 @@ function RowActionsMenu({
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
+  const [statusValue, setStatusValue] = useState("");
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const statusAction = actions.find((action) => action.kind === "status");
+  const buttonActions = actions.filter((action) => action.kind !== "status");
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    setStatusValue(statusAction?.defaultValue ?? row.status ?? "");
+  }, [open, row, statusAction]);
 
   useEffect(() => {
     if (!open) {
@@ -137,7 +153,7 @@ function RowActionsMenu({
               }}
               className="z-[120] min-w-40 rounded-md border border-border/70 bg-card p-1.5 shadow-[0_18px_42px_rgba(75,70,92,0.16)]"
             >
-              {actions.map((action) => {
+              {buttonActions.map((action) => {
                 const disabled =
                   typeof action.disabled === "function" ? action.disabled(row) : action.disabled;
 
@@ -167,6 +183,48 @@ function RowActionsMenu({
                   </button>
                 );
               })}
+
+              {statusAction ? (
+                (() => {
+                  const statusDisabled =
+                    typeof statusAction.disabled === "function"
+                      ? statusAction.disabled(row)
+                      : statusAction.disabled;
+                  const confirmDisabled =
+                    statusValue === (statusAction.defaultValue ?? row.status ?? "") || statusDisabled;
+
+                  return (
+                <div className="mt-1 rounded-md border border-border/70 bg-muted/20 p-2.5">
+                  <div className="mb-2 text-[12px] font-semibold uppercase tracking-[0.4px] text-muted-foreground">
+                    {statusAction.label}
+                  </div>
+                  <select
+                    value={statusValue}
+                    onChange={(event) => setStatusValue(event.target.value)}
+                    className="mb-2 h-9 w-full rounded-md border border-border/70 bg-card px-3 text-[13px] text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {(statusAction.options ?? []).map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="w-full"
+                    disabled={confirmDisabled}
+                    onClick={() => {
+                      statusAction.onClick(row, statusValue);
+                      setOpen(false);
+                    }}
+                  >
+                    Confirm
+                  </Button>
+                </div>
+                  );
+                })()
+              ) : null}
             </div>,
             document.body
           )
@@ -252,7 +310,7 @@ export function RichDataTable({
         enableSorting: column.sortable ?? true,
         enableColumnFilter: column.filterable ?? false,
         cell: ({ row }: { row: { original: RichTableRow } }) =>
-          formatCell(column.type, row.original[column.key] ?? "")
+          column.render ? column.render(row.original) : formatCell(column.type, row.original[column.key] ?? "")
       })),
       {
         id: "actions",

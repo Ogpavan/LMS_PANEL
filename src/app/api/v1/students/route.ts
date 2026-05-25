@@ -58,14 +58,14 @@ export async function POST(request: Request) {
 
   const payload = await readJson<StudentPayload>(request);
 
-  if (!payload?.name || !payload.email || !payload.program) {
-    return apiError("Name, email, and program are required", 422);
+  if (!payload?.name || !payload.email) {
+    return apiError("Name and email are required", 422);
   }
 
   const shouldCreateLogin = payload.createLogin ?? Boolean(payload.password);
   const name = payload.name;
   const email = payload.email;
-  const program = payload.program;
+  const program = payload.program?.trim() || "";
 
   if (shouldCreateLogin && !payload.password) {
     return apiError("Temporary password is required when login access is enabled", 422);

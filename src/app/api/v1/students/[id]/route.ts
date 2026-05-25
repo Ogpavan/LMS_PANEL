@@ -3,6 +3,7 @@ import { ensureDatabaseSetup } from "@/server/bootstrap";
 import { apiError, apiResponse, handleOptions, readJson } from "@/server/api";
 import { hashPassword } from "@/server/password";
 import { prisma } from "@/server/prisma";
+import { randomBytes } from "crypto";
 
 interface StudentPayload {
   name?: string;
@@ -10,6 +11,7 @@ interface StudentPayload {
   program?: string;
   progress?: number;
   status?: string;
+  portalAccess?: boolean;
   password?: string;
   createLogin?: boolean;
 }
@@ -17,6 +19,10 @@ interface StudentPayload {
 function parseId(value: string) {
   const id = Number(value);
   return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+function createTemporaryPassword() {
+  return `portal-${randomBytes(6).toString("hex")}`;
 }
 
 export async function GET(
@@ -83,19 +89,13 @@ export async function PUT(
     return apiError("Invalid student id", 422);
   }
 
-  if (
-    !payload?.name ||
-    !payload.email ||
-    !payload.program ||
-    typeof payload.progress !== "number" ||
-    !payload.status
-  ) {
-    return apiError("Name, email, program, progress, and status are required", 422);
+  if (!payload?.name || !payload.email || typeof payload.progress !== "number" || !payload.status) {
+    return apiError("Name, email, progress, and status are required", 422);
   }
 
   const name = payload.name;
   const email = payload.email;
-  const program = payload.program;
+  const program = payload.program?.trim();
   const progress = payload.progress;
   const status = payload.status;
 
@@ -103,7 +103,7 @@ export async function PUT(
 
   const existing = await prisma.student.findUnique({
     where: { id },
-    select: { id: true, email: true }
+    select: { id: true, email: true, program: true }
   });
 
   if (!existing) {
@@ -127,6 +127,8 @@ export async function PUT(
     select: { id: true, role: true }
   });
 
+  const nextPortalAccess = payload.portalAccess ?? payload.createLogin ?? (existingUser?.role === "STUDENT");
+
   const conflictingUser =
     email !== existing.email
       ? await prisma.apiUser.findUnique({
@@ -139,8 +141,11 @@ export async function PUT(
     return apiError("An account already exists for the updated email", 409);
   }
 
-  const shouldCreateLogin =
-    payload.createLogin ?? (Boolean(payload.password) || existingUser?.role === "STUDENT");
+  const shouldCreateLogin = nextPortalAccess;
+  const temporaryPassword = shouldCreateLogin && !existingUser && !payload.password
+    ? createTemporaryPassword()
+    : null;
+  const passwordToUse = payload.password ?? temporaryPassword;
 
   const result = await prisma.$transaction(async (tx) => {
     const student = await tx.student.update({
@@ -148,27 +153,31 @@ export async function PUT(
       data: {
         name,
         email,
-        program,
+        program: program ?? existing.program,
         progress,
         status
       }
     });
 
-    if (existingUser?.role === "STUDENT") {
+    if (!shouldCreateLogin && existingUser?.role === "STUDENT") {
+      await tx.apiUser.delete({
+        where: { id: existingUser.id }
+      });
+    } else if (existingUser?.role === "STUDENT") {
       await tx.apiUser.update({
         where: { id: existingUser.id },
         data: {
           name,
           email,
-          ...(payload.password ? { password: hashPassword(payload.password) } : {})
+          ...(passwordToUse ? { password: hashPassword(passwordToUse) } : {})
         }
       });
-    } else if (shouldCreateLogin && payload.password) {
+    } else if (shouldCreateLogin && passwordToUse) {
       await tx.apiUser.create({
         data: {
           name,
           email,
-          password: hashPassword(payload.password),
+          password: hashPassword(passwordToUse),
           role: "STUDENT"
         }
       });
@@ -176,7 +185,8 @@ export async function PUT(
 
     return {
       ...student,
-      hasAccount: shouldCreateLogin
+      hasAccount: shouldCreateLogin,
+      temporaryPassword: temporaryPassword ?? undefined
     };
   });
 
