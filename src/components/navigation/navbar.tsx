@@ -186,8 +186,13 @@ export function Navbar({ page }: { page: PageDefinition }) {
               <div className="p-3">
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     setIsProfileOpen(false);
+                    try {
+                      await fetch("/api/v1/auth/logout", { method: "POST" });
+                    } catch {
+                      // Clear local UI state even when the server is temporarily unavailable.
+                    }
                     clearSession();
                     router.push("/login");
                   }}

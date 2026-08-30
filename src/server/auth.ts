@@ -1,17 +1,8 @@
-import { createHmac, timingSafeEqual } from "crypto";
-
 import type { UserRole } from "@prisma/client";
 
-import { apiError } from "@/server/api";
-import { prisma } from "@/server/prisma";
-import { serverConfig } from "@/server/config";
-
-interface AuthTokenPayload {
-  sub: number;
-  email: string;
-  role: UserRole;
-  exp: number;
-}
+import { apiError, requireTrustedOrigin } from "@/server/api";
+import { findSession } from "@/server/session";
+import { hasInstructorPermission } from "@/server/permissions";
 
 export interface AuthUser {
   id: number;
@@ -30,108 +21,24 @@ function normalizePermissions(value: unknown) {
   return permissions.length > 0 ? permissions : [];
 }
 
-function encodeBase64Url(value: string) {
-  return Buffer.from(value, "utf8").toString("base64url");
-}
-
-function decodeBase64Url(value: string) {
-  return Buffer.from(value, "base64url").toString("utf8");
-}
-
-function sign(unsignedToken: string) {
-  return createHmac("sha256", serverConfig.api.authSecret)
-    .update(unsignedToken)
-    .digest("base64url");
-}
-
-export function createAccessToken(payload: AuthTokenPayload) {
-  const header = encodeBase64Url(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-  const body = encodeBase64Url(JSON.stringify(payload));
-  const unsignedToken = `${header}.${body}`;
-  const signature = sign(unsignedToken);
-
-  return `${unsignedToken}.${signature}`;
-}
-
-function verifyAccessToken(token: string): AuthTokenPayload | null {
-  const parts = token.split(".");
-
-  if (parts.length !== 3) {
-    return null;
-  }
-
-  const [header, body, signature] = parts;
-  const unsignedToken = `${header}.${body}`;
-  const expectedSignature = sign(unsignedToken);
-
-  const signatureBuffer = Buffer.from(signature);
-  const expectedBuffer = Buffer.from(expectedSignature);
-
-  if (
-    signatureBuffer.length !== expectedBuffer.length ||
-    !timingSafeEqual(signatureBuffer, expectedBuffer)
-  ) {
-    return null;
-  }
-
-  try {
-    const payload = JSON.parse(decodeBase64Url(body)) as AuthTokenPayload;
-
-    if (
-      typeof payload.sub !== "number" ||
-      typeof payload.email !== "string" ||
-      typeof payload.role !== "string" ||
-      typeof payload.exp !== "number"
-    ) {
-      return null;
-    }
-
-    if (payload.exp <= Math.floor(Date.now() / 1000)) {
-      return null;
-    }
-
-    return payload;
-  } catch {
-    return null;
-  }
-}
-
 export async function authenticateRequest(request: Request) {
-  const authorization = request.headers.get("authorization");
+  const session = await findSession(request);
 
-  if (!authorization?.startsWith("Bearer ")) {
+  if (session) {
     return {
-      error: apiError("Missing bearer token", 401)
+      user: {
+        id: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+        role: session.user.role,
+        permissions: session.user.permissions
+      }
     };
   }
 
-  const token = authorization.slice("Bearer ".length).trim();
-  const payload = verifyAccessToken(token);
-
-  if (!payload) {
-    return {
-      error: apiError("Invalid access token", 401)
-    };
-  }
-
-  const user = await prisma.apiUser.findUnique({
-    where: { id: payload.sub },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      permissions: true
-    }
-  });
-
-  if (!user) {
-    return {
-      error: apiError("Authenticated user not found", 401)
-    };
-  }
-
-  return { user };
+  return {
+    error: apiError("Missing or invalid session", 401)
+  };
 }
 
 export async function authorizeRequest(
@@ -142,6 +49,11 @@ export async function authorizeRequest(
     requiredPermission?: string;
   }
 ) {
+  if (!["GET", "HEAD", "OPTIONS"].includes(request.method.toUpperCase())) {
+    const originError = requireTrustedOrigin(request);
+    if (originError) return { error: originError };
+  }
+
   const auth = await authenticateRequest(request);
 
   if ("error" in auth) {
@@ -153,8 +65,8 @@ export async function authorizeRequest(
     permissions: normalizePermissions(auth.user.permissions)
   };
 
-  if (user.role === "INSTRUCTOR" && options?.requiredPermission && Array.isArray(user.permissions)) {
-    if (user.permissions.includes(options.requiredPermission)) {
+  if (user.role === "INSTRUCTOR" && options?.requiredPermission) {
+    if (hasInstructorPermission(user.permissions, options.requiredPermission)) {
       return { user };
     }
 

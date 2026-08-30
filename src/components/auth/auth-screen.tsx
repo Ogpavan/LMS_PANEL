@@ -7,11 +7,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import {
   Eye,
-  EyeOff,
-  Facebook,
-  Github,
-  Mail,
-  Twitter
+  EyeOff
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -26,26 +22,21 @@ interface AuthScreenProps {
   mode: AuthMode;
 }
 
-const socialIcons = [
-  { icon: Facebook, label: "Facebook" },
-  { icon: Twitter, label: "Twitter" },
-  { icon: Github, label: "GitHub" },
-  { icon: Mail, label: "Google" }
-];
-
 export function AuthScreen({ mode }: AuthScreenProps) {
   const router = useRouter();
   const setSession = useAuthStore((state) => state.setSession);
   const general = useAppSettingsStore((state) => state.general);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [remember, setRemember] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [formValues, setFormValues] = useState({
-    fullName: "John Doe",
-    email: mode === "login" ? "admin@demo.com" : "john@example.com",
-    username: "johndoe",
-    password: mode === "login" ? "admin" : "password",
-    confirmPassword: "password"
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
   });
 
   return (
@@ -118,35 +109,45 @@ export function AuthScreen({ mode }: AuthScreenProps) {
               onSubmit={async (event) => {
                 event.preventDefault();
                 setError(null);
+                setSuccess(null);
 
                 if (mode === "signup") {
                   if (formValues.password !== formValues.confirmPassword) {
                     setError("Passwords do not match");
                     return;
                   }
-
-                  router.push("/login");
-                  return;
                 }
 
                 setIsSubmitting(true);
 
                 try {
-                  const response = await fetch("/api/v1/auth/login", {
+                  const response = await fetch(
+                    mode === "login" ? "/api/v1/auth/login" : "/api/v1/auth/signup",
+                    {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({
-                      email: formValues.email,
-                      password: formValues.password
-                    })
+                    body: JSON.stringify(
+                      mode === "login"
+                        ? {
+                            email: formValues.email,
+                            password: formValues.password,
+                            remember
+                          }
+                        : {
+                            name: formValues.fullName,
+                            email: formValues.email,
+                            password: formValues.password,
+                            termsAccepted
+                          }
+                    )
                   });
 
                   const result = (await response.json()) as {
                     success?: boolean;
                     error?: string;
-                    accessToken?: string;
+                    message?: string;
                     expiresAt?: string;
                     user?: {
                       id: number;
@@ -157,10 +158,24 @@ export function AuthScreen({ mode }: AuthScreenProps) {
                     };
                   };
 
+                  if (mode === "signup") {
+                    if (!response.ok || !result.success) {
+                      setError(result.error ?? "Signup failed");
+                      return;
+                    }
+
+                    setSuccess(result.message ?? "Account created. You can now sign in.");
+                    setFormValues((current) => ({
+                      ...current,
+                      password: "",
+                      confirmPassword: ""
+                    }));
+                    return;
+                  }
+
                   if (
                     !response.ok ||
                     !result.success ||
-                    !result.accessToken ||
                     !result.expiresAt ||
                     !result.user
                   ) {
@@ -169,7 +184,6 @@ export function AuthScreen({ mode }: AuthScreenProps) {
                   }
 
                   setSession({
-                    accessToken: result.accessToken,
                     expiresAt: result.expiresAt,
                     user: {
                       id: result.user.id,
@@ -202,14 +216,6 @@ export function AuthScreen({ mode }: AuthScreenProps) {
                 value={formValues.email}
                 onChange={(value) => setFormValues((current) => ({ ...current, email: value }))}
               />
-              {mode === "signup" ? (
-                <Field
-                  label="Username"
-                  type="text"
-                  value={formValues.username}
-                  onChange={(value) => setFormValues((current) => ({ ...current, username: value }))}
-                />
-              ) : null}
               <Field
                 label="Password"
                 type={showPassword ? "text" : "password"}
@@ -243,16 +249,28 @@ export function AuthScreen({ mode }: AuthScreenProps) {
                 </div>
               ) : null}
 
+              {success ? (
+                <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] text-emerald-800">
+                  {success} <Link href="/login" className="font-semibold underline">Sign in</Link>
+                </div>
+              ) : null}
+
               <div className="flex items-center justify-between gap-4 text-[15px] text-foreground">
                 <label className="flex items-center gap-3">
                   <input
                     type="checkbox"
+                    checked={mode === "login" ? remember : termsAccepted}
+                    onChange={(event) =>
+                      mode === "login"
+                        ? setRemember(event.target.checked)
+                        : setTermsAccepted(event.target.checked)
+                    }
                     className="h-[18px] w-[18px] rounded border-input bg-background text-primary focus:ring-ring"
                   />
                   <span>{mode === "login" ? "Remember me" : "I agree to privacy policy & terms"}</span>
                 </label>
                 {mode === "login" ? (
-                  <Link href="/login" className="text-primary transition-colors hover:text-primary/85">
+                  <Link href="/forgot-password" className="text-primary transition-colors hover:text-primary/85">
                     Forgot Password?
                   </Link>
                 ) : null}
@@ -277,30 +295,6 @@ export function AuthScreen({ mode }: AuthScreenProps) {
               </Link>
             </p>
 
-            <div className="my-8 flex items-center gap-4 text-muted-foreground/80">
-              <div className="h-px flex-1 bg-border" />
-              <span className="text-[14px]">or</span>
-              <div className="h-px flex-1 bg-border" />
-            </div>
-
-            <div className="flex items-center justify-center gap-7">
-              {socialIcons.map(({ icon: Icon, label }) => (
-                <button
-                  key={label}
-                  type="button"
-                  className={cn(
-                    "rounded-full p-2 transition-transform hover:-translate-y-0.5 hover:bg-muted/70",
-                    label === "Facebook" && "text-[#3b5998]",
-                    label === "Twitter" && "text-[#1da1f2]",
-                    label === "GitHub" && "text-foreground",
-                    label === "Google" && "text-[#db4437]"
-                  )}
-                  aria-label={label}
-                >
-                  <Icon className="h-5 w-5" />
-                </button>
-              ))}
-            </div>
           </div>
         </section>
       </div>

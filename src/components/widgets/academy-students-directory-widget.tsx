@@ -990,7 +990,7 @@ export function AcademyStudentsDirectoryWidget({ config }: WidgetRendererProps) 
             </div>
           ) : rows.length === 0 && normalizedSearchQuery ? (
             <div className="rounded-md border border-dashed border-border px-4 py-10 text-center text-[14px] text-muted-foreground">
-              No students match "{searchQuery.trim()}".
+              No students match &quot;{searchQuery.trim()}&quot;.
             </div>
           ) : (
             <RichDataTable columns={tableColumns} rows={rows} rowActions={rowActions} />

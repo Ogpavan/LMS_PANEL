@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {
@@ -12,17 +13,69 @@ enum UserRole {
   STUDENT
 }
 
-model ApiUser {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  role      UserRole @default(ADMIN)
-  permissions Json?
-  createdAt DateTime @default(now()) @map("created_at")
-  loginEvents ApiLoginEvent[]
+enum AuthActionType {
+  VERIFY_EMAIL
+  RESET_PASSWORD
+}
 
+model ApiUser {
+  id                Int               @id @default(autoincrement())
+  name              String
+  email             String            @unique
+  password          String
+  role              UserRole          @default(ADMIN)
+  permissions       Json?
+  createdAt         DateTime          @default(now()) @map("created_at")
+  emailVerifiedAt   DateTime?         @map("email_verified_at")
+  isActive          Boolean           @default(true) @map("is_active")
+  passwordChangedAt DateTime          @default(now()) @map("password_changed_at")
+  loginEvents       ApiLoginEvent[]
+  sessions          AuthSession[]
+  actionTokens      AuthActionToken[]
+
+  @@index([role, name, id])
   @@map("api_users")
+}
+
+model AuthSession {
+  id         String    @id @default(cuid())
+  userId     Int       @map("user_id")
+  tokenHash  String    @unique @map("token_hash")
+  expiresAt  DateTime  @map("expires_at")
+  lastSeenAt DateTime  @default(now()) @map("last_seen_at")
+  revokedAt  DateTime? @map("revoked_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  user       ApiUser   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([expiresAt])
+  @@map("auth_sessions")
+}
+
+model AuthActionToken {
+  id         String         @id @default(cuid())
+  userId     Int            @map("user_id")
+  type       AuthActionType
+  tokenHash  String         @unique @map("token_hash")
+  expiresAt  DateTime       @map("expires_at")
+  consumedAt DateTime?      @map("consumed_at")
+  createdAt  DateTime       @default(now()) @map("created_at")
+  user       ApiUser        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type, expiresAt])
+  @@index([expiresAt])
+  @@map("auth_action_tokens")
+}
+
+model AuthRateLimit {
+  key             String    @id
+  attempts        Int       @default(0)
+  windowStartedAt DateTime  @map("window_started_at")
+  blockedUntil    DateTime? @map("blocked_until")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([updatedAt])
+  @@map("auth_rate_limits")
 }
 
 model ApiLoginEvent {
@@ -33,31 +86,34 @@ model ApiLoginEvent {
   createdAt DateTime @default(now()) @map("created_at")
   user      ApiUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, createdAt(sort: Desc)])
   @@map("api_login_events")
 }
 
 model Course {
-  id               Int      @id @default(autoincrement())
+  id               Int             @id @default(autoincrement())
   title            String
-  slug             String   @unique
+  slug             String          @unique
   category         String
   instructor       String
-  shortDescription String   @default("")
-  description      String   @default("")
-  thumbnailUrl     String   @default("")
-  price            Int      @default(0)
-  currency         String   @default("INR")
-  level            String   @default("beginner")
-  durationLabel    String   @default("")
-  language         String   @default("English")
-  contentMode      String   @default("topic")
-  status           String   @default("draft")
-  visibility       String   @default("public")
-  featured         Boolean  @default(false)
-  createdAt        DateTime @default(now()) @map("created_at")
+  shortDescription String          @default("")
+  description      String          @default("")
+  thumbnailUrl     String          @default("")
+  price            Int             @default(0)
+  currency         String          @default("INR")
+  level            String          @default("beginner")
+  durationLabel    String          @default("")
+  language         String          @default("English")
+  contentMode      String          @default("topic")
+  status           String          @default("draft")
+  visibility       String          @default("public")
+  featured         Boolean         @default(false)
+  createdAt        DateTime        @default(now()) @map("created_at")
   sections         CourseSection[]
   enrollments      Enrollment[]
 
+  @@index([category])
+  @@index([createdAt(sort: Desc), id(sort: Desc)])
   @@map("courses")
 }
 
@@ -70,6 +126,7 @@ model CourseSection {
   course     Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lessons    CourseLesson[]
 
+  @@index([courseId, orderIndex])
   @@map("course_sections")
 }
 
@@ -84,6 +141,7 @@ model CourseLesson {
   orderIndex    Int           @default(0) @map("order_index")
   section       CourseSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 
+  @@index([sectionId, orderIndex])
   @@map("course_lessons")
 }
 
@@ -95,32 +153,36 @@ model CourseCategory {
   status      String   @default("active")
   createdAt   DateTime @default(now()) @map("created_at")
 
+  @@index([status, name])
   @@map("course_categories")
 }
 
 model Student {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  program   String
-  progress  Int      @default(0)
-  status    String   @default("active")
-  createdAt DateTime @default(now()) @map("created_at")
+  id          Int          @id @default(autoincrement())
+  name        String
+  email       String       @unique
+  program     String
+  progress    Int          @default(0)
+  status      String       @default("active")
+  createdAt   DateTime     @default(now()) @map("created_at")
   enrollments Enrollment[]
 
+  @@index([name])
   @@map("students")
 }
 
 model Enrollment {
-  id         Int      @id @default(autoincrement())
-  studentId  Int      @map("student_id")
-  courseId   Int      @map("course_id")
-  status     String   @default("active")
-  createdAt  DateTime @default(now()) @map("created_at")
-  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  studentId Int      @map("student_id")
+  courseId  Int      @map("course_id")
+  status    String   @default("active")
+  createdAt DateTime @default(now()) @map("created_at")
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, courseId])
+  @@index([courseId])
+  @@index([createdAt(sort: Desc), id(sort: Desc)])
   @@map("enrollments")
 }
 
@@ -137,21 +199,23 @@ model LiveClass {
   status          String   @default("scheduled")
   createdAt       DateTime @default(now()) @map("created_at")
 
+  @@index([startsAt, id(sort: Desc)])
   @@map("live_classes")
 }
 
 model SupportEnquiry {
-  id         Int      @id @default(autoincrement())
-  name       String
-  email      String
-  phone      String   @default("")
-  topic      String
-  courseTitle String  @default("") @map("course_title")
-  channel    String   @default("email")
-  message    String   @default("")
-  status     String   @default("open")
-  createdAt  DateTime @default(now()) @map("created_at")
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String
+  phone       String   @default("")
+  topic       String
+  courseTitle String   @default("") @map("course_title")
+  channel     String   @default("email")
+  message     String   @default("")
+  status      String   @default("open")
+  createdAt   DateTime @default(now()) @map("created_at")
 
+  @@index([createdAt(sort: Desc), id(sort: Desc)])
   @@map("support_enquiries")
 }
 
@@ -166,6 +230,7 @@ model SupportFeedback {
   status      String   @default("pending")
   createdAt   DateTime @default(now()) @map("created_at")
 
+  @@index([createdAt(sort: Desc), id(sort: Desc)])
   @@map("support_feedback")
 }
 
@@ -183,6 +248,7 @@ model SupportTicket {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
+  @@index([createdAt(sort: Desc), id(sort: Desc)])
   @@map("support_tickets")
 }
 

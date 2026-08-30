@@ -34,6 +34,66 @@ function createCategorySlug(value) {
 }
 
 async function main() {
+  await prisma.lmsGeneralSetting.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      id: 1,
+      lmsName: "ETPL Learning Suite",
+      supportEmail: "support@etpllms.com",
+      supportContact: "+91 98765 43210",
+      tagline: "Professional learning operations for modern training teams.",
+      primaryColor: "#7367f0",
+      accentColor: "#0f766e",
+      headingFont: "Poppins",
+      bodyFont: "DM Sans"
+    }
+  });
+
+  await prisma.lmsPaymentSetting.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      id: 1,
+      activeGateway: "razorpay",
+      currency: "INR",
+      taxMode: "GST included",
+      invoicePrefix: "INV"
+    }
+  });
+
+  const initialAdminEmail = process.env.INITIAL_ADMIN_EMAIL?.trim().toLowerCase();
+  const initialAdminPassword = process.env.INITIAL_ADMIN_PASSWORD;
+
+  if (initialAdminEmail && initialAdminPassword) {
+    if (
+      initialAdminPassword.length < 12 ||
+      !/[a-z]/.test(initialAdminPassword) ||
+      !/[A-Z]/.test(initialAdminPassword) ||
+      !/[0-9]/.test(initialAdminPassword) ||
+      !/[^A-Za-z0-9]/.test(initialAdminPassword)
+    ) {
+      throw new Error(
+        "INITIAL_ADMIN_PASSWORD must be at least 12 characters and include upper/lowercase letters, a number, and a symbol"
+      );
+    }
+
+    await prisma.apiUser.upsert({
+      where: { email: initialAdminEmail },
+      update: { role: "ADMIN", isActive: true },
+      create: {
+        name: process.env.INITIAL_ADMIN_NAME?.trim() || "LMS Administrator",
+        email: initialAdminEmail,
+        password: hashPassword(initialAdminPassword),
+        role: "ADMIN",
+        emailVerifiedAt: new Date()
+      }
+    });
+  }
+
+  const seedDemoData = process.env.NODE_ENV !== "production" || process.env.SEED_DEMO_DATA === "true";
+  if (!seedDemoData) return;
+
   await prisma.apiUser.upsert({
     where: { email: "admin@demo.com" },
     update: { role: "ADMIN" },
@@ -41,7 +101,8 @@ async function main() {
       name: "Admin User",
       email: "admin@demo.com",
       password: hashPassword("admin"),
-      role: "ADMIN"
+      role: "ADMIN",
+      emailVerifiedAt: new Date()
     }
   });
 
@@ -52,7 +113,8 @@ async function main() {
       name: "Instructor User",
       email: "instructor@demo.com",
       password: hashPassword("instructor"),
-      role: "INSTRUCTOR"
+      role: "INSTRUCTOR",
+      emailVerifiedAt: new Date()
     }
   });
 
@@ -63,7 +125,8 @@ async function main() {
       name: "Student User",
       email: "student@demo.com",
       password: hashPassword("student"),
-      role: "STUDENT"
+      role: "STUDENT",
+      emailVerifiedAt: new Date()
     }
   });
 

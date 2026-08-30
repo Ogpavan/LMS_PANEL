@@ -3,6 +3,7 @@ import { ensureDatabaseSetup } from "@/server/bootstrap";
 import { apiError, apiResponse, handleOptions, readJson } from "@/server/api";
 import { hashPassword } from "@/server/password";
 import { prisma } from "@/server/prisma";
+import { normalizeEmail, passwordValidationError, validateEmail, validateName } from "@/server/account-validation";
 
 interface InstructorPayload {
   name?: string;
@@ -55,9 +56,14 @@ export async function POST(request: Request) {
     return apiError("Name, email, and temporary password are required", 422);
   }
 
-  const name = payload.name;
-  const email = payload.email;
+  const name = payload.name.trim();
+  const email = normalizeEmail(payload.email);
   const password = payload.password;
+
+  if (!validateName(name)) return apiError("Name must contain between 2 and 100 characters", 422);
+  if (!validateEmail(email)) return apiError("Invalid email address", 422);
+  const passwordError = passwordValidationError(password);
+  if (passwordError) return apiError(passwordError, 422);
 
   await ensureDatabaseSetup();
 
@@ -75,7 +81,9 @@ export async function POST(request: Request) {
       name,
       email,
       password: hashPassword(password),
-      role: "INSTRUCTOR"
+      role: "INSTRUCTOR",
+      permissions: ["academy.dashboard"],
+      emailVerifiedAt: new Date()
     },
     select: {
       id: true,

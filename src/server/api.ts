@@ -6,7 +6,9 @@ function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": serverConfig.api.corsOrigin,
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization"
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Credentials": "true",
+    "Vary": "Origin"
   };
 }
 
@@ -43,4 +45,15 @@ export async function readJson<T>(request: Request) {
   } catch {
     return null;
   }
+}
+
+export function requireTrustedOrigin(request: Request) {
+  const origin = request.headers.get("origin");
+  const requestOrigin = new URL(request.url).origin;
+
+  if (!origin || origin === requestOrigin || origin === serverConfig.api.corsOrigin) {
+    return null;
+  }
+
+  return apiError("Request origin is not allowed", 403);
 }

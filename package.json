@@ -6,10 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
+    "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:setup": "prisma migrate deploy && node prisma/seed.mjs",
     "prisma:seed": "node prisma/seed.mjs"
   },
   "dependencies": {
@@ -26,7 +31,7 @@
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.454.0",
     "next": "^15.0.0",
-    "prisma": "^7.8.0",
+    "nodemailer": "^9.0.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sonner": "^2.0.7",
@@ -35,12 +40,17 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "@types/nodemailer": "^8.0.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.20",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.24",
     "postcss": "^8.4.49",
+    "prisma": "^7.10.0",
     "tailwindcss": "^3.4.14",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "vitest": "^4.1.11"
   },
   "prisma": {
     "seed": "node prisma/seed.mjs"

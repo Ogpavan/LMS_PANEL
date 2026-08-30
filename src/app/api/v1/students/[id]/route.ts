@@ -4,6 +4,7 @@ import { apiError, apiResponse, handleOptions, readJson } from "@/server/api";
 import { hashPassword } from "@/server/password";
 import { prisma } from "@/server/prisma";
 import { randomBytes } from "crypto";
+import { normalizeEmail, passwordValidationError, validateEmail, validateName } from "@/server/account-validation";
 
 interface StudentPayload {
   name?: string;
@@ -93,11 +94,18 @@ export async function PUT(
     return apiError("Name, email, progress, and status are required", 422);
   }
 
-  const name = payload.name;
-  const email = payload.email;
+  const name = payload.name.trim();
+  const email = normalizeEmail(payload.email);
   const program = payload.program?.trim();
   const progress = payload.progress;
   const status = payload.status;
+
+  if (!validateName(name)) return apiError("Name must contain between 2 and 100 characters", 422);
+  if (!validateEmail(email)) return apiError("Invalid email address", 422);
+  if (payload.password) {
+    const passwordError = passwordValidationError(payload.password);
+    if (passwordError) return apiError(passwordError, 422);
+  }
 
   await ensureDatabaseSetup();
 
@@ -169,16 +177,26 @@ export async function PUT(
         data: {
           name,
           email,
-          ...(passwordToUse ? { password: hashPassword(passwordToUse) } : {})
+          ...(passwordToUse
+            ? { password: hashPassword(passwordToUse), passwordChangedAt: new Date() }
+            : {})
         }
       });
+
+      if (passwordToUse) {
+        await tx.authSession.updateMany({
+          where: { userId: existingUser.id, revokedAt: null },
+          data: { revokedAt: new Date() }
+        });
+      }
     } else if (shouldCreateLogin && passwordToUse) {
       await tx.apiUser.create({
         data: {
           name,
           email,
           password: hashPassword(passwordToUse),
-          role: "STUDENT"
+          role: "STUDENT",
+          emailVerifiedAt: new Date()
         }
       });
     }

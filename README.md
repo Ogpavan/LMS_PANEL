@@ -2,6 +2,22 @@
 
 Config-driven admin shell built with Next.js App Router, TypeScript, Tailwind CSS, Zustand, Framer Motion, Lucide React, and shadcn-style primitives.
 
+## Database Setup
+
+Apply the Prisma schema and seed required defaults once when provisioning a database:
+
+```bash
+npm run prisma:setup
+```
+
+Normal API requests never run schema creation or seed queries. Create migrations
+with `npm run prisma:migrate:dev` and apply committed migrations in deployments
+with `npm run prisma:migrate:deploy`.
+
+Production seeding does not create demo accounts. Set `INITIAL_ADMIN_EMAIL`,
+`INITIAL_ADMIN_PASSWORD`, and optionally `INITIAL_ADMIN_NAME` when provisioning
+the first administrator.
+
 ## What It Solves
 
 - Sidebar navigation is generated from module config.

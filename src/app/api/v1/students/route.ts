@@ -3,6 +3,7 @@ import { ensureDatabaseSetup } from "@/server/bootstrap";
 import { apiError, apiResponse, handleOptions, readJson } from "@/server/api";
 import { hashPassword } from "@/server/password";
 import { prisma } from "@/server/prisma";
+import { normalizeEmail, passwordValidationError, validateEmail, validateName } from "@/server/account-validation";
 
 interface StudentPayload {
   name?: string;
@@ -63,12 +64,20 @@ export async function POST(request: Request) {
   }
 
   const shouldCreateLogin = payload.createLogin ?? Boolean(payload.password);
-  const name = payload.name;
-  const email = payload.email;
+  const name = payload.name.trim();
+  const email = normalizeEmail(payload.email);
   const program = payload.program?.trim() || "";
+
+  if (!validateName(name)) return apiError("Name must contain between 2 and 100 characters", 422);
+  if (!validateEmail(email)) return apiError("Invalid email address", 422);
 
   if (shouldCreateLogin && !payload.password) {
     return apiError("Temporary password is required when login access is enabled", 422);
+  }
+
+  if (payload.password) {
+    const passwordError = passwordValidationError(payload.password);
+    if (passwordError) return apiError(passwordError, 422);
   }
 
   await ensureDatabaseSetup();
@@ -109,7 +118,8 @@ export async function POST(request: Request) {
           name,
           email,
           password: hashPassword(payload.password),
-          role: "STUDENT"
+          role: "STUDENT",
+          emailVerifiedAt: new Date()
         }
       });
     }

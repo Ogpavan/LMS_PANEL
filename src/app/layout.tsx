@@ -3,6 +3,7 @@ import { Public_Sans } from "next/font/google";
 import "@/styles/globals.css";
 
 import { AppSettingsProvider } from "@/providers/app-settings-provider";
+import { AuthSessionProvider } from "@/providers/auth-session-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 
 const publicSans = Public_Sans({
@@ -15,7 +16,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={publicSans.variable}>
         <AppSettingsProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <AuthSessionProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </AuthSessionProvider>
         </AppSettingsProvider>
       </body>
     </html>
