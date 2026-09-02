@@ -62,6 +62,7 @@ export async function authorizeRequest(
 
   const user = {
     ...auth.user,
+    role: (auth.user.role ? String(auth.user.role).toUpperCase() : "ADMIN") as UserRole,
     permissions: normalizePermissions(auth.user.permissions)
   };
 

@@ -282,3 +282,31 @@ model LmsPaymentSetting {
 
   @@map("lms_payment_settings")
 }
+
+model CertificateTemplate {
+  id           Int                 @id @default(autoincrement())
+  name         String
+  courseTitle  String              @map("course_title")
+  imageUrl     String?             @default("") @map("image_url")
+  status       String              @default("active")
+  createdAt    DateTime            @default(now()) @map("created_at")
+  updatedAt    DateTime            @updatedAt @map("updated_at")
+  certificates IssuedCertificate[]
+
+  @@map("certificate_templates")
+}
+
+model IssuedCertificate {
+  id                Int                 @id @default(autoincrement())
+  certificateNumber String              @unique @map("certificate_number")
+  templateId        Int                 @map("template_id")
+  studentName       String              @map("student_name")
+  studentEmail      String              @map("student_email")
+  courseTitle       String              @map("course_title")
+  status            String              @default("issued")
+  issuedAt          DateTime            @default(now()) @map("issued_at")
+  template          CertificateTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
+  @@map("issued_certificates")
+}

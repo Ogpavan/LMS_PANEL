@@ -1,10 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { Sparkles } from "lucide-react";
 
 import type { WidgetRendererProps } from "@/types/admin";
 
 import { Card, CardContent } from "@/components/ui/card";
+
+const pillRouteMap: Record<string, string> = {
+  Courses: "/dashboard/academy/courses/all",
+  Classes: "/dashboard/academy/classes/live",
+  Students: "/dashboard/academy/students/all",
+  Analytics: "/dashboard/academy/analytics/course-reports"
+};
 
 export function HeroWidget({ config }: WidgetRendererProps) {
   const eyebrow = String(config.props?.eyebrow ?? "Framework Ready");
@@ -38,14 +46,33 @@ export function HeroWidget({ config }: WidgetRendererProps) {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3 rounded-xl border border-border/70 bg-background/70 p-4">
-            {pills.map((pill) => (
-              <div
-                key={pill}
-                className="rounded-lg border border-border/70 bg-white px-3 py-2 text-center text-[13px] font-medium leading-[20px] text-muted-foreground dark:bg-card"
-              >
-                {pill}
-              </div>
-            ))}
+            {pills.map((pill) => {
+              const matchedKey = Object.keys(pillRouteMap).find(
+                (key) => key.toLowerCase() === pill.toLowerCase()
+              );
+              const href = matchedKey ? pillRouteMap[matchedKey] : undefined;
+
+              if (href) {
+                return (
+                  <Link
+                    key={pill}
+                    href={href}
+                    className="rounded-lg border border-border/70 bg-white px-3 py-2 text-center text-[13px] font-medium leading-[20px] text-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary dark:bg-card dark:hover:bg-primary/10"
+                  >
+                    {pill}
+                  </Link>
+                );
+              }
+
+              return (
+                <div
+                  key={pill}
+                  className="rounded-lg border border-border/70 bg-white px-3 py-2 text-center text-[13px] font-medium leading-[20px] text-muted-foreground dark:bg-card"
+                >
+                  {pill}
+                </div>
+              );
+            })}
           </div>
         </div>
       </CardContent>

@@ -14,12 +14,14 @@ export async function GET(request: Request) {
 
   await ensureDatabaseSetup();
 
-  // 1. Fetch metric counts
-  const [activeCoursesCount, totalCoursesCount] = await Promise.all([
+  // 1. Fetch course metric counts
+  const [activeCoursesCount, draftCoursesCount, totalCoursesCount] = await Promise.all([
     prisma.course.count({ where: { status: "published" } }),
+    prisma.course.count({ where: { status: "draft" } }),
     prisma.course.count()
   ]);
 
+  // 2. Fetch live class metric counts
   const [upcomingClassesCount, totalClassesCount] = await Promise.all([
     prisma.liveClass.count({ where: { status: { in: ["scheduled", "live"] } } }),
     prisma.liveClass.count()
@@ -27,7 +29,7 @@ export async function GET(request: Request) {
 
   const totalStudentsCount = await prisma.student.count();
 
-  // 2. Enrollments and revenue calculation
+  // 3. Enrollments and revenue calculation
   const enrollments = await prisma.enrollment.findMany({
     select: {
       id: true,
@@ -45,7 +47,7 @@ export async function GET(request: Request) {
   const totalEnrollments = enrollments.length;
   const totalRevenue = enrollments.reduce((sum, e) => sum + (e.course?.price ?? 0), 0);
 
-  // 3. Monthly Enrollment Trend points (past 8 months)
+  // 4. Monthly Enrollment Trend points (past 8 months)
   const now = new Date();
   const monthKeys: string[] = [];
   const monthLabels: string[] = [];
@@ -70,11 +72,8 @@ export async function GET(request: Request) {
 
   const enrollmentTrendPoints = monthKeys.map((key) => monthCountsMap[key] ?? 0);
 
-  // 4. Priority items from real DB
-  const [openTicketsCount, openEnquiriesCount] = await Promise.all([
-    prisma.supportTicket.count({ where: { status: "open" } }),
-    prisma.supportEnquiry.count({ where: { status: "open" } })
-  ]);
+  // 5. Priority items from existing database counts
+  const openEnquiriesCount = await prisma.supportEnquiry.count({ where: { status: "open" } });
 
   return apiResponse({
     success: true,
@@ -110,9 +109,9 @@ export async function GET(request: Request) {
       },
       priorityItems: [
         {
-          label: "Support tickets",
-          value: `${openTicketsCount} unresolved ticket${openTicketsCount === 1 ? "" : "s"}`,
-          tone: openTicketsCount > 0 ? "Review" : "Good"
+          label: "Course Status",
+          value: `${draftCoursesCount} draft course${draftCoursesCount === 1 ? "" : "s"}`,
+          tone: draftCoursesCount > 0 ? "Review" : "Good"
         },
         {
           label: "Student enquiries",

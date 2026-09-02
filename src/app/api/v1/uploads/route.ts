@@ -25,6 +25,11 @@ const uploadKinds = {
     directory: "videos",
     mimePrefix: "video/",
     maxBytes: 1024 * 1024 * 1024
+  },
+  "certificate-template": {
+    directory: "images",
+    mimePrefix: "image/",
+    maxBytes: 15 * 1024 * 1024
   }
 } as const;
 
@@ -53,9 +58,7 @@ async function writeFileToDisk(file: File, destinationPath: string) {
 }
 
 export async function POST(request: Request) {
-  const auth = await authorizeRequest(request, ["ADMIN", "INSTRUCTOR"], {
-    requiredPermission: "academy.courses.create"
-  });
+  const auth = await authorizeRequest(request, ["ADMIN", "INSTRUCTOR"]);
 
   if ("error" in auth) {
     return auth.error;

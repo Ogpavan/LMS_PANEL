@@ -31,6 +31,7 @@ import { cn } from "@/utils/cn";
 export interface RichTableColumn {
   key: string;
   header: string;
+  align?: "left" | "center" | "right";
   type?: "text" | "email" | "badge" | "currency" | "date" | "highlight";
   sortable?: boolean;
   filterable?: boolean;
@@ -194,34 +195,34 @@ function RowActionsMenu({
                     statusValue === (statusAction.defaultValue ?? row.status ?? "") || statusDisabled;
 
                   return (
-                <div className="mt-1 rounded-md border border-border/70 bg-muted/20 p-2.5">
-                  <div className="mb-2 text-[12px] font-semibold uppercase tracking-[0.4px] text-muted-foreground">
-                    {statusAction.label}
-                  </div>
-                  <select
-                    value={statusValue}
-                    onChange={(event) => setStatusValue(event.target.value)}
-                    className="mb-2 h-9 w-full rounded-md border border-border/70 bg-card px-3 text-[13px] text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    {(statusAction.options ?? []).map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <Button
-                    type="button"
-                    size="sm"
-                    className="w-full"
-                    disabled={confirmDisabled}
-                    onClick={() => {
-                      statusAction.onClick(row, statusValue);
-                      setOpen(false);
-                    }}
-                  >
-                    Confirm
-                  </Button>
-                </div>
+                    <div className="mt-1 rounded-md border border-border/70 bg-muted/20 p-2.5">
+                      <div className="mb-2 text-[12px] font-semibold uppercase tracking-[0.4px] text-muted-foreground">
+                        {statusAction.label}
+                      </div>
+                      <select
+                        value={statusValue}
+                        onChange={(event) => setStatusValue(event.target.value)}
+                        className="mb-2 h-9 w-full rounded-md border border-border/70 bg-card px-3 text-[13px] text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        {(statusAction.options ?? []).map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="w-full"
+                        disabled={confirmDisabled}
+                        onClick={() => {
+                          statusAction.onClick(row, statusValue);
+                          setOpen(false);
+                        }}
+                      >
+                        Confirm
+                      </Button>
+                    </div>
                   );
                 })()
               ) : null}
@@ -307,6 +308,7 @@ export function RichDataTable({
       ...columns.map((column) => ({
         accessorKey: column.key,
         header: column.header,
+        meta: { align: column.align },
         enableSorting: column.sortable ?? true,
         enableColumnFilter: column.filterable ?? false,
         cell: ({ row }: { row: { original: RichTableRow } }) =>
@@ -315,6 +317,7 @@ export function RichDataTable({
       {
         id: "actions",
         header: "Actions",
+        meta: { align: "left" },
         enableSorting: false,
         enableColumnFilter: false,
         cell: ({ row }: { row: { original: RichTableRow } }) =>
@@ -344,31 +347,41 @@ export function RichDataTable({
             <thead className="bg-[linear-gradient(180deg,rgba(248,247,250,1),rgba(242,241,247,1))] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))]">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className="border-b border-border/70 px-4 py-3 text-left text-[12px] font-semibold uppercase leading-[18px] tracking-[0.45px] text-muted-foreground"
-                    >
-                      {header.isPlaceholder ? null : (
-                        <button
-                          type="button"
-                          onClick={header.column.getToggleSortingHandler()}
-                          className={cn(
-                            "flex items-center gap-2 transition-colors",
-                            header.column.getCanSort()
-                              ? "cursor-pointer hover:text-foreground"
-                              : "cursor-default"
-                          )}
-                        >
-                          <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
-                          {{
-                            asc: "↑",
-                            desc: "↓"
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </button>
-                      )}
-                    </th>
-                  ))}
+                  {headerGroup.headers.map((header) => {
+                    const colMeta = header.column.columnDef.meta as { align?: "left" | "center" | "right" } | undefined;
+                    const alignClass = colMeta?.align === "center" ? "text-center" : colMeta?.align === "right" ? "text-right" : "text-left";
+                    const flexAlignClass = colMeta?.align === "center" ? "justify-center w-full" : colMeta?.align === "right" ? "justify-end w-full" : "";
+
+                    return (
+                      <th
+                        key={header.id}
+                        className={cn(
+                          "border-b border-border/70 px-4 py-3 text-[12px] font-semibold uppercase leading-[18px] tracking-[0.45px] text-muted-foreground",
+                          alignClass
+                        )}
+                      >
+                        {header.isPlaceholder ? null : (
+                          <button
+                            type="button"
+                            onClick={header.column.getToggleSortingHandler()}
+                            className={cn(
+                              "flex items-center gap-2 transition-colors",
+                              header.column.getCanSort()
+                                ? "cursor-pointer hover:text-foreground"
+                                : "cursor-default",
+                              flexAlignClass
+                            )}
+                          >
+                            <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
+                            {{
+                              asc: "↑",
+                              desc: "↓"
+                            }[header.column.getIsSorted() as string] ?? null}
+                          </button>
+                        )}
+                      </th>
+                    );
+                  })}
                 </tr>
               ))}
             </thead>
@@ -381,11 +394,16 @@ export function RichDataTable({
                     ""
                   )}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3 text-[13px] font-normal leading-[20px] text-foreground">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    const colMeta = cell.column.columnDef.meta as { align?: "left" | "center" | "right" } | undefined;
+                    const alignClass = colMeta?.align === "center" ? "text-center" : colMeta?.align === "right" ? "text-right" : "text-left";
+
+                    return (
+                      <td key={cell.id} className={cn("px-4 py-3 text-[13px] font-normal leading-[20px] text-foreground", alignClass)}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>

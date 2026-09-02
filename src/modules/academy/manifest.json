@@ -325,23 +325,10 @@
       "layoutKey": "stack",
       "widgets": [
         {
-          "id": "academy-courses-certificates-table",
-          "widgetKey": "table",
-          "title": "Certificate queue",
-          "size": "full",
-          "props": {
-            "columns": [
-              { "key": "template", "label": "Template" },
-              { "key": "course", "label": "Course" },
-              { "key": "issued", "label": "Issued" },
-              { "key": "status", "label": "Status" }
-            ],
-            "rows": [
-              { "template": "Completion Pro", "course": "Frontend Mastery", "issued": "320", "status": "Active" },
-              { "template": "Leadership Gold", "course": "Team Management", "issued": "114", "status": "Active" },
-              { "template": "AI Certificate", "course": "AI Foundations", "issued": "208", "status": "Pending review" }
-            ]
-          }
+          "id": "academy-courses-certificates",
+          "widgetKey": "academy-certificates",
+          "title": "Certificate Queue & Templates",
+          "size": "full"
         }
       ]
     },
