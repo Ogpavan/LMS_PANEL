@@ -16,6 +16,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { DatePicker, formatDMY, parseDMY } from "@/components/widgets/date-picker";
+import {
+  combineDateAndTime,
+  format12HourTime,
+  parse12HourTime,
+  Time12HourPicker
+} from "@/components/widgets/time-12hr-picker";
 import { useAuthStore } from "@/store/auth-store";
 
 interface LiveClassRecord {
@@ -304,68 +311,96 @@ export function AcademyScheduleClassWidget({ config }: WidgetRendererProps) {
               </div>
             </div>
 
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <Field
-                label="Class title"
-                required
-                value={form.title}
-                onChange={(value) => setForm((current) => ({ ...current, title: value }))}
-              />
-              <Field
-                label="Course title"
-                value={form.courseTitle}
-                onChange={(value) => setForm((current) => ({ ...current, courseTitle: value }))}
-              />
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field
-                  label="Host name"
-                  required
-                  value={form.hostName}
-                  onChange={(value) => setForm((current) => ({ ...current, hostName: value }))}
-                />
-                <Field
-                  label="Host email"
-                  required
-                  type="email"
-                  value={form.hostEmail}
-                  onChange={(value) => setForm((current) => ({ ...current, hostEmail: value }))}
-                />
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field
-                  label="Start date & time"
-                  required
-                  type="datetime-local"
-                  value={form.startsAt}
-                  onChange={(value) => setForm((current) => ({ ...current, startsAt: value }))}
-                />
-                <Field
-                  label="Duration (minutes)"
-                  required
-                  type="number"
-                  value={form.durationMinutes}
-                  onChange={(value) => setForm((current) => ({ ...current, durationMinutes: value }))}
-                />
-              </div>
-              <Field
-                label="Google Meet link"
-                required
-                value={form.meetUrl}
-                onChange={(value) => setForm((current) => ({ ...current, meetUrl: value }))}
-                placeholder="https://meet.google.com/abc-defg-hij"
-              />
-              <TextAreaField
-                label="Class description"
-                value={form.description}
-                onChange={(value) => setForm((current) => ({ ...current, description: value }))}
-                rows={4}
-              />
-              <div className="flex justify-end">
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Scheduling..." : "Schedule Class"}
-                </Button>
-              </div>
-            </form>
+            {(() => {
+              const parsedDate = parseDMY(form.startsAt ? (form.startsAt.includes("T") ? form.startsAt.split("T")[0] : form.startsAt) : "");
+              const startDate = parsedDate ? formatDMY(parsedDate) : "";
+              const timePart = form.startsAt && form.startsAt.includes("T") ? form.startsAt.split("T")[1]?.slice(0, 5) : "";
+              const parsedTime = parse12HourTime(timePart);
+              const timeStr = parsedTime ? format12HourTime(parsedTime.hour12, parsedTime.minute, parsedTime.period) : "";
+
+              function handleStartDateChange(newDate: string) {
+                const currentTime = timeStr || "09:00 AM";
+                const combined = combineDateAndTime(newDate, currentTime);
+                setForm((current) => ({ ...current, startsAt: combined }));
+              }
+
+              function handleTimeChange(newTime: string) {
+                const currentDate = startDate || formatDMY(new Date());
+                const combined = combineDateAndTime(currentDate, newTime);
+                setForm((current) => ({ ...current, startsAt: combined }));
+              }
+
+              return (
+                <form className="space-y-4" onSubmit={handleSubmit}>
+                  <Field
+                    label="Class title"
+                    required
+                    value={form.title}
+                    onChange={(value) => setForm((current) => ({ ...current, title: value }))}
+                  />
+                  <Field
+                    label="Course title"
+                    value={form.courseTitle}
+                    onChange={(value) => setForm((current) => ({ ...current, courseTitle: value }))}
+                  />
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field
+                      label="Host name"
+                      required
+                      value={form.hostName}
+                      onChange={(value) => setForm((current) => ({ ...current, hostName: value }))}
+                    />
+                    <Field
+                      label="Host email"
+                      required
+                      type="email"
+                      value={form.hostEmail}
+                      onChange={(value) => setForm((current) => ({ ...current, hostEmail: value }))}
+                    />
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <DatePicker
+                      label="Start Date"
+                      required
+                      value={startDate}
+                      onChange={handleStartDateChange}
+                    />
+                    <Time12HourPicker
+                      label="Time"
+                      required
+                      value={timeStr}
+                      onChange={handleTimeChange}
+                      placeholder="07:30 PM"
+                    />
+                  </div>
+                  <Field
+                    label="Duration (minutes)"
+                    required
+                    type="number"
+                    value={form.durationMinutes}
+                    onChange={(value) => setForm((current) => ({ ...current, durationMinutes: value }))}
+                  />
+                  <Field
+                    label="Google Meet link"
+                    required
+                    value={form.meetUrl}
+                    onChange={(value) => setForm((current) => ({ ...current, meetUrl: value }))}
+                    placeholder="https://meet.google.com/abc-defg-hij"
+                  />
+                  <TextAreaField
+                    label="Class description"
+                    value={form.description}
+                    onChange={(value) => setForm((current) => ({ ...current, description: value }))}
+                    rows={4}
+                  />
+                  <div className="flex justify-end">
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? "Scheduling..." : "Schedule Class"}
+                    </Button>
+                  </div>
+                </form>
+              );
+            })()}
           </CardContent>
         </Card>
 

@@ -5,6 +5,7 @@ import { AcademyCoursesBrowseWidget } from "@/components/widgets/academy-courses
 import { AcademyCourseCategoriesWidget } from "@/components/widgets/academy-course-categories-widget";
 import { AcademyCourseReportsWidget } from "@/components/widgets/academy-course-reports-widget";
 import { AcademyCoursesDirectoryWidget } from "@/components/widgets/academy-courses-directory-widget";
+import { AcademyDashboardOverviewWidget } from "@/components/widgets/academy-dashboard-overview-widget";
 import { AcademyAttendanceWidget } from "@/components/widgets/academy-attendance-widget";
 import { AcademyEnrollmentsWidget } from "@/components/widgets/academy-enrollments-widget";
 import { AcademyInstructorPermissionsWidget } from "@/components/widgets/academy-instructor-permissions-widget";
@@ -35,6 +36,7 @@ export const widgetRegistry: WidgetDefinition[] = [
   { key: "academy-course-categories", component: AcademyCourseCategoriesWidget },
   { key: "academy-course-reports", component: AcademyCourseReportsWidget },
   { key: "academy-courses-directory", component: AcademyCoursesDirectoryWidget },
+  { key: "academy-dashboard-overview", component: AcademyDashboardOverviewWidget },
   { key: "academy-enrollments", component: AcademyEnrollmentsWidget },
   { key: "academy-instructor-permissions", component: AcademyInstructorPermissionsWidget },
   { key: "academy-people-manager", component: AcademyPeopleManagerWidget },

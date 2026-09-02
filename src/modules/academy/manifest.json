@@ -262,71 +262,10 @@
           }
         },
         {
-          "id": "academy-active-courses",
-          "widgetKey": "metric",
-          "title": "Active courses",
-          "size": "sm",
-          "props": {
-            "value": "128",
-            "delta": "+12%",
-            "caption": "Published this quarter"
-          }
-        },
-        {
-          "id": "academy-live-classes",
-          "widgetKey": "metric",
-          "title": "Live classes",
-          "size": "sm",
-          "props": {
-            "value": "24",
-            "delta": "+5%",
-            "caption": "Running this week"
-          }
-        },
-        {
-          "id": "academy-total-students",
-          "widgetKey": "metric",
-          "title": "Total students",
-          "size": "sm",
-          "props": {
-            "value": "18.2k",
-            "delta": "+9%",
-            "caption": "Across all programs"
-          }
-        },
-        {
-          "id": "academy-enrollment-trend",
-          "widgetKey": "chart",
-          "title": "Enrollment trend",
-          "size": "xl",
-          "props": {
-            "points": [42, 51, 56, 63, 74, 82, 89, 97]
-          }
-        },
-        {
-          "id": "academy-priority-items",
-          "widgetKey": "list",
-          "title": "Priority items",
-          "size": "lg",
-          "props": {
-            "rows": [
-              {
-                "label": "Certificates pending",
-                "value": "84 learners awaiting issuance",
-                "tone": "Review"
-              },
-              {
-                "label": "Attendance follow-up",
-                "value": "6 classes below threshold",
-                "tone": "Investigate"
-              },
-              {
-                "label": "Support backlog",
-                "value": "14 unresolved tickets",
-                "tone": "Respond"
-              }
-            ]
-          }
+          "id": "academy-dashboard-overview",
+          "widgetKey": "academy-dashboard-overview",
+          "title": "Dashboard Overview",
+          "size": "full"
         }
       ]
     },
