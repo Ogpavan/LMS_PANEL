@@ -389,22 +389,9 @@
       "widgets": [
         {
           "id": "academy-assessments-assignments-table",
-          "widgetKey": "table",
+          "widgetKey": "academy-assignments",
           "title": "Assignment tracker",
-          "size": "full",
-          "props": {
-            "columns": [
-              { "key": "assignment", "label": "Assignment" },
-              { "key": "course", "label": "Course" },
-              { "key": "due", "label": "Due date" },
-              { "key": "status", "label": "Status" }
-            ],
-            "rows": [
-              { "assignment": "Capstone Build", "course": "Frontend Mastery", "due": "May 22", "status": "Open" },
-              { "assignment": "Dashboard Review", "course": "Product Analytics", "due": "May 24", "status": "Draft" },
-              { "assignment": "Model Prompt Pack", "course": "AI Foundations", "due": "May 27", "status": "Open" }
-            ]
-          }
+          "size": "full"
         }
       ]
     },
@@ -417,16 +404,10 @@
       "layoutKey": "stack",
       "widgets": [
         {
-          "id": "academy-assessments-quizzes-list",
-          "widgetKey": "list",
-          "title": "Quiz activity",
-          "props": {
-            "rows": [
-              { "label": "Weekly frontend quiz", "value": "318 submissions received", "tone": "Review" },
-              { "label": "SQL checkpoint", "value": "Average score 82%", "tone": "Analyze" },
-              { "label": "AI concepts quiz", "value": "Publishes tomorrow", "tone": "Prepare" }
-            ]
-          }
+          "id": "academy-assessments-quizzes-table",
+          "widgetKey": "academy-quizzes",
+          "title": "Quiz tracker",
+          "size": "full"
         }
       ]
     },

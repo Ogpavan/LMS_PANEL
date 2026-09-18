@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 const requiredEnv = ["DATABASE_URL"] as const;
 
 for (const key of requiredEnv) {

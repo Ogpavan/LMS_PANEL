@@ -265,6 +265,168 @@ async function main() {
       create: student
     });
   }
+
+  const frontendCourse = await prisma.course.findFirst({ where: { title: "Frontend Mastery" } });
+  const analyticsCourse = await prisma.course.findFirst({ where: { title: "Product Analytics" } });
+  const aiCourse = await prisma.course.findFirst({ where: { title: "AI Foundations" } });
+
+  const sampleAssignments = [
+    {
+      title: "Capstone Build",
+      description: "Build a production-ready dashboard interface using React and Tailwind CSS.",
+      courseId: frontendCourse?.id,
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      totalMarks: 100,
+      status: "PUBLISHED"
+    },
+    {
+      title: "Dashboard Review",
+      description: "Perform cohort analysis and build event funnels for product growth metric analysis.",
+      courseId: analyticsCourse?.id,
+      dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+      totalMarks: 50,
+      status: "DRAFT"
+    },
+    {
+      title: "Model Prompt Pack",
+      description: "Design and evaluate prompt engineering workflows for LLM integration.",
+      courseId: aiCourse?.id,
+      dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      totalMarks: 100,
+      status: "PUBLISHED"
+    }
+  ];
+
+  for (const asn of sampleAssignments) {
+    if (asn.courseId) {
+      const existingAsn = await prisma.assignment.findFirst({
+        where: { title: asn.title, courseId: asn.courseId }
+      });
+      if (!existingAsn) {
+        await prisma.assignment.create({ data: asn });
+      }
+    }
+  }
+
+  const sampleQuizzes = [
+    {
+      title: "Weekly Frontend Checkpoint",
+      description: "Test your knowledge of React hooks, state management, and DOM events.",
+      courseId: frontendCourse?.id,
+      totalMarks: 20,
+      passingMarks: 14,
+      dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+      status: "PUBLISHED",
+      questions: [
+        {
+          question: "Which hook is used for side-effects in React functional components?",
+          type: "multiple_choice",
+          marks: 10,
+          explanation: "useEffect is standard for running side-effects after render.",
+          options: [
+            { optionText: "useState", isCorrect: false },
+            { optionText: "useEffect", isCorrect: true },
+            { optionText: "useContext", isCorrect: false },
+            { optionText: "useReducer", isCorrect: false }
+          ]
+        },
+        {
+          question: "What does JSX stand for?",
+          type: "multiple_choice",
+          marks: 10,
+          explanation: "JSX stands for JavaScript XML.",
+          options: [
+            { optionText: "JavaScript XML", isCorrect: true },
+            { optionText: "Java Syntax Extension", isCorrect: false },
+            { optionText: "JSON Serialization Syntax", isCorrect: false },
+            { optionText: "JavaScript Extended Syntax", isCorrect: false }
+          ]
+        }
+      ]
+    },
+    {
+      title: "SQL & Analytics Fundamentals",
+      description: "Evaluation on basic SQL queries, joins, aggregation, and funnel metrics.",
+      courseId: analyticsCourse?.id,
+      totalMarks: 15,
+      passingMarks: 10,
+      dueDate: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000),
+      status: "DRAFT",
+      questions: [
+        {
+          question: "Which SQL keyword is used to filter records after aggregation?",
+          type: "multiple_choice",
+          marks: 15,
+          explanation: "HAVING clause filters aggregated group results.",
+          options: [
+            { optionText: "WHERE", isCorrect: false },
+            { optionText: "HAVING", isCorrect: true },
+            { optionText: "GROUP BY", isCorrect: false },
+            { optionText: "ORDER BY", isCorrect: false }
+          ]
+        }
+      ]
+    },
+    {
+      title: "AI Concepts & Prompting Quiz",
+      description: "Covers prompt structure, token limits, zero-shot vs few-shot prompting.",
+      courseId: aiCourse?.id,
+      totalMarks: 25,
+      passingMarks: 18,
+      dueDate: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000),
+      status: "PUBLISHED",
+      questions: [
+        {
+          question: "What is few-shot prompting?",
+          type: "multiple_choice",
+          marks: 25,
+          explanation: "Few-shot prompting provides one or more examples in the prompt payload.",
+          options: [
+            { optionText: "Providing no examples in the prompt", isCorrect: false },
+            { optionText: "Providing concrete input-output examples inside the prompt", isCorrect: true },
+            { optionText: "Fine-tuning the model weights directly", isCorrect: false },
+            { optionText: "Retrying the prompt multiple times automatically", isCorrect: false }
+          ]
+        }
+      ]
+    }
+  ];
+
+  for (const quizData of sampleQuizzes) {
+    if (quizData.courseId) {
+      const existingQuiz = await prisma.quiz.findFirst({
+        where: { title: quizData.title, courseId: quizData.courseId }
+      });
+
+      if (!existingQuiz) {
+        const { questions, ...quizFields } = quizData;
+        const createdQuiz = await prisma.quiz.create({
+          data: quizFields
+        });
+
+        for (let qIdx = 0; qIdx < questions.length; qIdx++) {
+          const q = questions[qIdx];
+          await prisma.quizQuestion.create({
+            data: {
+              quizId: createdQuiz.id,
+              question: q.question,
+              type: q.type,
+              marks: q.marks,
+              explanation: q.explanation,
+              orderIndex: qIdx,
+              options: {
+                create: q.options.map((opt, oIdx) => ({
+                  optionText: opt.optionText,
+                  isCorrect: opt.isCorrect,
+                  orderIndex: oIdx
+                }))
+              }
+            }
+          });
+        }
+      }
+    }
+  }
 }
 
 main()

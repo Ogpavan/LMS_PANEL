@@ -111,6 +111,8 @@ model Course {
   createdAt        DateTime        @default(now()) @map("created_at")
   sections         CourseSection[]
   enrollments      Enrollment[]
+  assignments      Assignment[]
+  quizzes          Quiz[]
 
   @@index([category])
   @@index([createdAt(sort: Desc), id(sort: Desc)])
@@ -310,3 +312,72 @@ model IssuedCertificate {
   @@index([templateId])
   @@map("issued_certificates")
 }
+
+model Assignment {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String   @default("")
+  courseId    Int      @map("course_id")
+  dueDate     DateTime @map("due_date")
+  totalMarks  Int      @default(100) @map("total_marks")
+  status      String   @default("DRAFT")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@index([createdAt(sort: Desc), id(sort: Desc)])
+  @@map("assignments")
+}
+
+model Quiz {
+  id           Int            @id @default(autoincrement())
+  title        String
+  description  String         @default("")
+  courseId     Int            @map("course_id")
+  totalMarks   Int            @default(0) @map("total_marks")
+  passingMarks Int            @default(0) @map("passing_marks")
+  dueDate      DateTime?      @map("due_date")
+  status       String         @default("DRAFT")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  course       Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions    QuizQuestion[]
+
+  @@index([courseId])
+  @@index([createdAt(sort: Desc), id(sort: Desc)])
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id          Int                  @id @default(autoincrement())
+  quizId      Int                  @map("quiz_id")
+  question    String
+  type        String               @default("multiple_choice")
+  marks       Int                  @default(1)
+  orderIndex  Int                  @default(0) @map("order_index")
+  explanation String?              @default("")
+  createdAt   DateTime             @default(now()) @map("created_at")
+
+  quiz        Quiz                 @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options     QuizQuestionOption[]
+
+  @@index([quizId, orderIndex])
+  @@map("quiz_questions")
+}
+
+model QuizQuestionOption {
+  id         Int          @id @default(autoincrement())
+  questionId Int          @map("question_id")
+  optionText String       @map("option_text")
+  isCorrect  Boolean      @default(false) @map("is_correct")
+  orderIndex Int          @default(0) @map("order_index")
+
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId, orderIndex])
+  @@map("quiz_question_options")
+}
+

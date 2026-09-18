@@ -1,5 +1,7 @@
 import type { WidgetDefinition } from "@/types/admin";
 
+import { AcademyAssignmentsWidget } from "@/components/widgets/academy-assignments-widget";
+import { AcademyQuizzesWidget } from "@/components/widgets/academy-quizzes-widget";
 import { AcademyCourseBuilderWidget } from "@/components/widgets/academy-course-builder-widget";
 import { AcademyCoursesBrowseWidget } from "@/components/widgets/academy-courses-browse-widget";
 import { AcademyCourseCategoriesWidget } from "@/components/widgets/academy-course-categories-widget";
@@ -31,6 +33,8 @@ import { MetricWidget } from "@/components/widgets/metric-widget";
 import { TableWidget } from "@/components/widgets/table-widget";
 
 export const widgetRegistry: WidgetDefinition[] = [
+  { key: "academy-assignments", component: AcademyAssignmentsWidget },
+  { key: "academy-quizzes", component: AcademyQuizzesWidget },
   { key: "academy-attendance", component: AcademyAttendanceWidget },
   { key: "academy-course-builder", component: AcademyCourseBuilderWidget },
   { key: "academy-courses-browse", component: AcademyCoursesBrowseWidget },
