@@ -32,6 +32,7 @@ model ApiUser {
   loginEvents       ApiLoginEvent[]
   sessions          AuthSession[]
   actionTokens      AuthActionToken[]
+  googleToken       GoogleAuthToken?
 
   @@index([role, name, id])
   @@map("api_users")
@@ -168,6 +169,7 @@ model Student {
   status      String       @default("active")
   createdAt   DateTime     @default(now()) @map("created_at")
   enrollments Enrollment[]
+  quizAttempts QuizAttempt[]
 
   @@index([name])
   @@map("students")
@@ -332,19 +334,25 @@ model Assignment {
 }
 
 model Quiz {
-  id           Int            @id @default(autoincrement())
-  title        String
-  description  String         @default("")
-  courseId     Int            @map("course_id")
-  totalMarks   Int            @default(0) @map("total_marks")
-  passingMarks Int            @default(0) @map("passing_marks")
-  dueDate      DateTime?      @map("due_date")
-  status       String         @default("DRAFT")
-  createdAt    DateTime       @default(now()) @map("created_at")
-  updatedAt    DateTime       @updatedAt @map("updated_at")
+  id                      Int            @id @default(autoincrement())
+  title                   String
+  description             String         @default("")
+  courseId                Int            @map("course_id")
+  totalMarks              Int            @default(0) @map("total_marks")
+  passingMarks            Int            @default(0) @map("passing_marks")
+  dueDate                 DateTime?      @map("due_date")
+  status                  String         @default("DRAFT")
+  googleFormId            String?        @map("google_form_id")
+  googleFormUrl           String?        @map("google_form_url")
+  googleResponderUri      String?        @map("google_responder_uri")
+  googleIntegrationStatus String?        @default("NOT_CONNECTED") @map("google_integration_status")
+  googleLastSyncedAt      DateTime?      @map("google_last_synced_at")
+  createdAt               DateTime       @default(now()) @map("created_at")
+  updatedAt               DateTime       @updatedAt @map("updated_at")
 
-  course       Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  questions    QuizQuestion[]
+  course                  Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions               QuizQuestion[]
+  attempts                QuizAttempt[]
 
   @@index([courseId])
   @@index([createdAt(sort: Desc), id(sort: Desc)])
@@ -352,17 +360,19 @@ model Quiz {
 }
 
 model QuizQuestion {
-  id          Int                  @id @default(autoincrement())
-  quizId      Int                  @map("quiz_id")
-  question    String
-  type        String               @default("multiple_choice")
-  marks       Int                  @default(1)
-  orderIndex  Int                  @default(0) @map("order_index")
-  explanation String?              @default("")
-  createdAt   DateTime             @default(now()) @map("created_at")
+  id             Int                  @id @default(autoincrement())
+  quizId         Int                  @map("quiz_id")
+  question       String
+  type           String               @default("multiple_choice")
+  marks          Int                  @default(1)
+  orderIndex     Int                  @default(0) @map("order_index")
+  explanation    String?              @default("")
+  googleItemId   String?              @map("google_item_id")
+  createdAt      DateTime             @default(now()) @map("created_at")
 
-  quiz        Quiz                 @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  options     QuizQuestionOption[]
+  quiz           Quiz                 @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options        QuizQuestionOption[]
+  attemptAnswers QuizAttemptAnswer[]
 
   @@index([quizId, orderIndex])
   @@map("quiz_questions")
@@ -379,5 +389,64 @@ model QuizQuestionOption {
 
   @@index([questionId, orderIndex])
   @@map("quiz_question_options")
+}
+
+model GoogleAuthToken {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique @map("user_id")
+  accessToken  String   @map("access_token")
+  refreshToken String?  @map("refresh_token")
+  expiresAt    DateTime @map("expires_at")
+  scope        String?  @map("scope")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user         ApiUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("google_auth_tokens")
+}
+
+model QuizAttempt {
+  id               Int                 @id @default(autoincrement())
+  quizId           Int                 @map("quiz_id")
+  studentId        Int?                @map("student_id")
+  studentEmail     String              @map("student_email")
+  studentName      String              @default("") @map("student_name")
+  googleResponseId String?             @unique @map("google_response_id")
+  score            Float               @default(0)
+  totalMarks       Float               @default(0) @map("total_marks")
+  percentage       Float               @default(0)
+  passed           Boolean             @default(false)
+  status           String              @default("COMPLETED")
+  source           String              @default("GOOGLE_FORMS")
+  submittedAt      DateTime            @default(now()) @map("submitted_at")
+  syncedAt         DateTime            @default(now()) @map("synced_at")
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
+
+  quiz             Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  student          Student?            @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  answers          QuizAttemptAnswer[]
+
+  @@index([quizId])
+  @@index([studentId])
+  @@index([studentEmail])
+  @@map("quiz_attempts")
+}
+
+model QuizAttemptAnswer {
+  id             Int           @id @default(autoincrement())
+  attemptId      Int           @map("attempt_id")
+  questionId     Int?          @map("question_id")
+  googleItemId   String?       @map("google_item_id")
+  selectedAnswer String        @default("") @map("selected_answer")
+  marksAwarded   Float         @default(0) @map("marks_awarded")
+
+  attempt        QuizAttempt   @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question       QuizQuestion? @relation(fields: [questionId], references: [id], onDelete: SetNull)
+
+  @@index([attemptId])
+  @@index([questionId])
+  @@map("quiz_attempt_answers")
 }
 

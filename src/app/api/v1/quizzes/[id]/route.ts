@@ -3,6 +3,21 @@ import { ensureDatabaseSetup } from "@/server/bootstrap";
 import { apiError, apiResponse, handleOptions, readJson } from "@/server/api";
 import { prisma } from "@/server/prisma";
 
+interface OptionPayload {
+  id?: number;
+  optionText: string;
+  isCorrect?: boolean;
+}
+
+interface QuestionSyncPayload {
+  id?: number;
+  question: string;
+  type?: string;
+  marks?: number;
+  explanation?: string;
+  options: OptionPayload[];
+}
+
 interface UpdateQuizPayload {
   title?: string;
   description?: string;
@@ -11,6 +26,7 @@ interface UpdateQuizPayload {
   passingMarks?: number | string;
   dueDate?: string | null;
   status?: string;
+  questions?: QuestionSyncPayload[];
 }
 
 function parseId(value: string) {
@@ -150,14 +166,6 @@ export async function PUT(
       updateData.courseId = courseId;
     }
 
-    if (payload?.totalMarks !== undefined) {
-      const totalMarks = Number(payload.totalMarks);
-      if (Number.isNaN(totalMarks) || totalMarks < 0) {
-        return apiError("Total marks must be a non-negative number", 422);
-      }
-      updateData.totalMarks = totalMarks;
-    }
-
     if (payload?.passingMarks !== undefined) {
       const passingMarks = Number(payload.passingMarks);
       if (Number.isNaN(passingMarks) || passingMarks < 0) {
@@ -182,12 +190,97 @@ export async function PUT(
       updateData.status = payload.status.toUpperCase() === "PUBLISHED" ? "PUBLISHED" : "DRAFT";
     }
 
+    // Process questions array if provided
+    if (payload && Array.isArray(payload.questions)) {
+      const keepIds = payload.questions
+        .map((q) => Number(q.id))
+        .filter((qId) => Number.isInteger(qId) && qId > 0);
+
+      // Delete questions removed by user
+      await prisma.quizQuestion.deleteMany({
+        where: {
+          quizId: id,
+          ...(keepIds.length > 0 ? { id: { notIn: keepIds } } : {})
+        }
+      });
+
+      let computedTotalMarks = 0;
+
+      for (let idx = 0; idx < payload.questions.length; idx++) {
+        const q = payload.questions[idx];
+        const marks = q.marks !== undefined && Number(q.marks) > 0 ? Number(q.marks) : 1;
+        computedTotalMarks += marks;
+
+        const validOptions = (q.options || [])
+          .filter((opt) => opt.optionText.trim())
+          .map((opt, oIdx) => ({
+            optionText: opt.optionText.trim(),
+            isCorrect: Boolean(opt.isCorrect),
+            orderIndex: oIdx
+          }));
+
+        if (q.id && Number(q.id) > 0) {
+          const qId = Number(q.id);
+          // Delete old options
+          await prisma.quizQuestionOption.deleteMany({
+            where: { questionId: qId }
+          });
+
+          // Update question
+          await prisma.quizQuestion.update({
+            where: { id: qId },
+            data: {
+              question: q.question.trim(),
+              type: q.type || "multiple_choice",
+              marks,
+              explanation: q.explanation?.trim() || "",
+              orderIndex: idx,
+              options: {
+                create: validOptions
+              }
+            }
+          });
+        } else {
+          // Create new question
+          await prisma.quizQuestion.create({
+            data: {
+              quizId: id,
+              question: q.question.trim(),
+              type: q.type || "multiple_choice",
+              marks,
+              explanation: q.explanation?.trim() || "",
+              orderIndex: idx,
+              options: {
+                create: validOptions
+              }
+            }
+          });
+        }
+      }
+
+      updateData.totalMarks = computedTotalMarks;
+    } else if (payload?.totalMarks !== undefined) {
+      const totalMarks = Number(payload.totalMarks);
+      if (Number.isNaN(totalMarks) || totalMarks < 0) {
+        return apiError("Total marks must be a non-negative number", 422);
+      }
+      updateData.totalMarks = totalMarks;
+    }
+
     const result = await prisma.quiz.update({
       where: { id },
       data: updateData,
       include: {
         course: {
           select: { id: true, title: true }
+        },
+        questions: {
+          orderBy: { orderIndex: "asc" },
+          include: {
+            options: {
+              orderBy: { orderIndex: "asc" }
+            }
+          }
         },
         _count: {
           select: { questions: true }

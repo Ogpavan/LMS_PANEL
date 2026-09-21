@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Clock3, Globe2, RefreshCcw, User2, Video } from "lucide-react";
+import { Clock3, Globe2, RefreshCcw, Search, User2, Video } from "lucide-react";
 import { toast } from "sonner";
 
 import type { WidgetRendererProps } from "@/types/admin";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/auth-store";
 
 interface CourseBrowseRecord {
@@ -47,6 +48,7 @@ export function AcademyCoursesBrowseWidget({ config }: WidgetRendererProps) {
   const clearSession = useAuthStore((state) => state.clearSession);
   const user = useAuthStore((state) => state.user);
   const [records, setRecords] = useState<CourseBrowseRecord[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -59,14 +61,23 @@ export function AcademyCoursesBrowseWidget({ config }: WidgetRendererProps) {
   }, [accessToken]);
 
   const visibleCourses = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     return records.filter((record) => {
       if (user?.role === "student") {
-        return record.status.toLowerCase() === "published" && record.visibility.toLowerCase() === "public";
+        if (!(record.status.toLowerCase() === "published" && record.visibility.toLowerCase() === "public")) {
+          return false;
+        }
       }
-
-      return true;
+      if (!q) return true;
+      return (
+        record.title.toLowerCase().includes(q) ||
+        record.category.toLowerCase().includes(q) ||
+        record.instructor.toLowerCase().includes(q) ||
+        (record.shortDescription && record.shortDescription.toLowerCase().includes(q)) ||
+        record.level.toLowerCase().includes(q)
+      );
     });
-  }, [records, user?.role]);
+  }, [records, user?.role, searchQuery]);
 
   async function loadCourses() {
     setIsLoading(true);
@@ -117,6 +128,25 @@ export function AcademyCoursesBrowseWidget({ config }: WidgetRendererProps) {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[240px]">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Input
+              type="text"
+              placeholder="Search courses by title, instructor, category..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-8 h-9 text-[13px] bg-card"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-[11px] font-semibold"
+              >
+                ✕
+              </button>
+            )}
+          </div>
           <Button variant="outline" onClick={() => void loadCourses()} disabled={isLoading}>
             <RefreshCcw className="h-4 w-4" />
             Refresh
@@ -134,8 +164,18 @@ export function AcademyCoursesBrowseWidget({ config }: WidgetRendererProps) {
           Loading course catalog...
         </div>
       ) : visibleCourses.length === 0 ? (
-        <div className="rounded-md border border-dashed border-border px-4 py-10 text-center text-[14px] text-muted-foreground">
-          No courses are available in the catalog yet.
+        <div className="rounded-md border border-dashed border-border px-4 py-10 text-center text-[14px] text-muted-foreground space-y-2">
+          <p className="font-semibold text-foreground">No courses found</p>
+          <p className="text-[13px]">
+            {searchQuery.trim()
+              ? `No courses match "${searchQuery.trim()}". Try clearing your search.`
+              : "No courses are available in the catalog yet."}
+          </p>
+          {searchQuery.trim() && (
+            <Button variant="outline" size="sm" onClick={() => setSearchQuery("")} className="mt-2 text-xs">
+              Clear Search
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">

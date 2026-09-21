@@ -11,6 +11,7 @@ import {
   ChevronsRight,
   Eye,
   Pencil,
+  Search,
   Trash2
 } from "lucide-react";
 import {
@@ -26,6 +27,7 @@ import type { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/utils/cn";
 
 export interface RichTableColumn {
@@ -295,13 +297,29 @@ function formatCell(type: RichTableColumn["type"], value: string) {
 export function RichDataTable({
   columns,
   rows,
-  rowActions
+  rowActions,
+  searchPlaceholder = "Search table...",
+  enableSearch = true
 }: {
   columns: RichTableColumn[];
   rows: RichTableRow[];
   rowActions?: RichTableAction[];
+  searchPlaceholder?: string;
+  enableSearch?: boolean;
 }) {
+  const [searchQuery, setSearchQuery] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
+
+  const filteredRows = useMemo(() => {
+    if (!enableSearch || !searchQuery.trim()) return rows;
+    const q = searchQuery.trim().toLowerCase();
+    return rows.filter((row) =>
+      Object.entries(row).some(([key, val]) => {
+        if (val === null || val === undefined) return false;
+        return String(val).toLowerCase().includes(q);
+      })
+    );
+  }, [rows, searchQuery, enableSearch]);
 
   const tableColumns = useMemo<ColumnDef<RichTableRow>[]>(
     () => [
@@ -328,7 +346,7 @@ export function RichDataTable({
   );
 
   const table = useReactTable({
-    data: rows,
+    data: filteredRows,
     columns: tableColumns,
     state: {
       sorting
@@ -341,84 +359,132 @@ export function RichDataTable({
 
   return (
     <div className="space-y-4">
+      {enableSearch && (
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-0.5">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Input
+              type="text"
+              placeholder={searchPlaceholder}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-8 h-9 text-[13px] bg-card border-border/70 focus-visible:ring-1"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-[11px] font-semibold bg-muted/60 hover:bg-muted rounded-full h-4 w-4 flex items-center justify-center transition-colors"
+                title="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          {searchQuery.trim() && (
+            <div className="text-[12px] text-muted-foreground font-medium">
+              Showing <span className="font-semibold text-foreground">{filteredRows.length}</span> of {rows.length} records
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="overflow-hidden rounded-md border border-border/70 bg-card shadow-[0_10px_30px_rgba(75,70,92,0.08)]">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[980px] border-collapse">
-            <thead className="bg-[linear-gradient(180deg,rgba(248,247,250,1),rgba(242,241,247,1))] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))]">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    const colMeta = header.column.columnDef.meta as { align?: "left" | "center" | "right" } | undefined;
-                    const alignClass = colMeta?.align === "center" ? "text-center" : colMeta?.align === "right" ? "text-right" : "text-left";
-                    const flexAlignClass = colMeta?.align === "center" ? "justify-center w-full" : colMeta?.align === "right" ? "justify-end w-full" : "";
+          {filteredRows.length === 0 && searchQuery.trim() ? (
+            <div className="p-8 text-center text-muted-foreground space-y-2">
+              <p className="text-[14px] font-semibold text-foreground">No matching records found</p>
+              <p className="text-[13px]">
+                No records match &quot;{searchQuery.trim()}&quot;. Try a different search term.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setSearchQuery("")}
+                className="mt-2 text-[12px] h-8"
+              >
+                Clear Search
+              </Button>
+            </div>
+          ) : (
+            <table className="w-full min-w-[980px] border-collapse">
+              <thead className="bg-[linear-gradient(180deg,rgba(248,247,250,1),rgba(242,241,247,1))] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))]">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      const colMeta = header.column.columnDef.meta as { align?: "left" | "center" | "right" } | undefined;
+                      const alignClass = colMeta?.align === "center" ? "text-center" : colMeta?.align === "right" ? "text-right" : "text-left";
+                      const flexAlignClass = colMeta?.align === "center" ? "justify-center w-full" : colMeta?.align === "right" ? "justify-end w-full" : "";
 
-                    return (
-                      <th
-                        key={header.id}
-                        className={cn(
-                          "border-b border-border/70 px-4 py-3 text-[12px] font-semibold uppercase leading-[18px] tracking-[0.45px] text-muted-foreground",
-                          alignClass
-                        )}
-                      >
-                        {header.isPlaceholder ? null : (
-                          <button
-                            type="button"
-                            onClick={header.column.getToggleSortingHandler()}
-                            className={cn(
-                              "flex items-center gap-2 transition-colors",
-                              header.column.getCanSort()
-                                ? "cursor-pointer hover:text-foreground"
-                                : "cursor-default",
-                              flexAlignClass
-                            )}
-                          >
-                            <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
-                            {{
-                              asc: "↑",
-                              desc: "↓"
-                            }[header.column.getIsSorted() as string] ?? null}
-                          </button>
-                        )}
-                      </th>
-                    );
-                  })}
-                </tr>
-              ))}
-            </thead>
-            <tbody className="bg-card">
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className={cn(
-                    "border-b border-border/50 transition-colors last:border-0 hover:bg-[rgba(115,103,240,0.04)] dark:hover:bg-white/5",
-                    ""
-                  )}
-                >
-                  {row.getVisibleCells().map((cell) => {
-                    const colMeta = cell.column.columnDef.meta as { align?: "left" | "center" | "right" } | undefined;
-                    const alignClass = colMeta?.align === "center" ? "text-center" : colMeta?.align === "right" ? "text-right" : "text-left";
+                      return (
+                        <th
+                          key={header.id}
+                          className={cn(
+                            "border-b border-border/70 px-4 py-3 text-[12px] font-semibold uppercase leading-[18px] tracking-[0.45px] text-muted-foreground",
+                            alignClass
+                          )}
+                        >
+                          {header.isPlaceholder ? null : (
+                            <button
+                              type="button"
+                              onClick={header.column.getToggleSortingHandler()}
+                              className={cn(
+                                "flex items-center gap-2 transition-colors",
+                                header.column.getCanSort()
+                                  ? "cursor-pointer hover:text-foreground"
+                                  : "cursor-default",
+                                flexAlignClass
+                              )}
+                            >
+                              <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
+                              {{
+                                asc: "↑",
+                                desc: "↓"
+                              }[header.column.getIsSorted() as string] ?? null}
+                            </button>
+                          )}
+                        </th>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </thead>
+              <tbody className="bg-card">
+                {table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className={cn(
+                      "border-b border-border/50 transition-colors last:border-0 hover:bg-[rgba(115,103,240,0.04)] dark:hover:bg-white/5",
+                      ""
+                    )}
+                  >
+                    {row.getVisibleCells().map((cell) => {
+                      const colMeta = cell.column.columnDef.meta as { align?: "left" | "center" | "right" } | undefined;
+                      const alignClass = colMeta?.align === "center" ? "text-center" : colMeta?.align === "right" ? "text-right" : "text-left";
 
-                    return (
-                      <td key={cell.id} className={cn("px-4 py-3 text-[13px] font-normal leading-[20px] text-foreground", alignClass)}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      return (
+                        <td key={cell.id} className={cn("px-4 py-3 text-[13px] font-normal leading-[20px] text-foreground", alignClass)}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
       <div className="flex flex-col gap-3 rounded-md border border-border/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,247,250,0.96))] px-4 py-3 lg:flex-row lg:items-center lg:justify-between dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))]">
         <div className="text-[13px] font-normal leading-[20px] text-muted-foreground">
-          Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}-
+          Showing {filteredRows.length > 0 ? table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1 : 0}-
           {Math.min(
             (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-            rows.length
+            filteredRows.length
           )}{" "}
-          of {rows.length}
+          of {filteredRows.length}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

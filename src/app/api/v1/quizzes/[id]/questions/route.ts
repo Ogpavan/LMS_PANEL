@@ -344,4 +344,67 @@ export async function DELETE(
   }
 }
 
+// PATCH /api/v1/quizzes/[id]/questions (reorder questions)
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const auth = await authorizeRequest(request, ["ADMIN", "INSTRUCTOR"], {
+      requiredPermission: "academy.assessments.quizzes"
+    });
+
+    if ("error" in auth) {
+      return auth.error;
+    }
+
+    const { id: rawId } = await params;
+    const quizId = parseId(rawId);
+
+    if (!quizId) {
+      return apiError("Invalid quiz id", 422);
+    }
+
+    const payload = await readJson<{ questionIds: number[] }>(request);
+
+    if (!Array.isArray(payload?.questionIds)) {
+      return apiError("questionIds array is required for reordering", 422);
+    }
+
+    await ensureDatabaseSetup();
+
+    for (let index = 0; index < payload.questionIds.length; index++) {
+      const questionId = Number(payload.questionIds[index]);
+      if (questionId > 0) {
+        await prisma.quizQuestion.updateMany({
+          where: { id: questionId, quizId },
+          data: { orderIndex: index }
+        });
+      }
+    }
+
+    const updatedQuestions = await prisma.quizQuestion.findMany({
+      where: { quizId },
+      orderBy: { orderIndex: "asc" },
+      include: {
+        options: {
+          orderBy: { orderIndex: "asc" }
+        }
+      }
+    });
+
+    return apiResponse({
+      success: true,
+      data: updatedQuestions
+    });
+  } catch (err) {
+    console.error("PATCH /api/v1/quizzes/[id]/questions error:", err);
+    return apiError(
+      err instanceof Error ? err.message : "Failed to reorder quiz questions",
+      500
+    );
+  }
+}
+
 export const OPTIONS = handleOptions;
+
